@@ -1,15 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
 import { generateId, type Reservation } from '@/lib/reservations'
 
+const DATA_FILE = process.env.VERCEL ? '/tmp/reservations.json' : './data/reservations.json'
+
+function readReservations(): Reservation[] {
+  try {
+    const fs = require('fs')
+    const path = require('path')
+    const filePath = process.env.VERCEL ? '/tmp/reservations.json' : path.join(process.cwd(), 'data', 'reservations.json')
+    if (!fs.existsSync(filePath)) return []
+    const data = fs.readFileSync(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch { return [] }
+}
+
+function writeReservations(reservations: Reservation[]) {
+  const fs = require('fs')
+  const path = require('path')
+  const filePath = process.env.VERCEL ? '/tmp/reservations.json' : path.join(process.cwd(), 'data', 'reservations.json')
+  const dir = process.env.VERCEL ? '/tmp' : path.join(process.cwd(), 'data')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  fs.writeFileSync(filePath, JSON.stringify(reservations, null, 2))
+}
+
 export async function GET() {
-  const { data, error } = await supabase
-    .from('reservations')
-    .select('*')
-    .order('created_at', { ascending: false })
-  
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  const reservations = readReservations().sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  return NextResponse.json(reservations)
 }
 
 export async function POST(req: NextRequest) {
@@ -20,29 +36,22 @@ export async function POST(req: NextRequest) {
     ...body
   }
   
-  const { data, error } = await supabase
-    .from('reservations')
-    .insert(reservation)
-    .select()
-    .single()
+  const all = readReservations()
+  all.unshift(reservation)
+  writeReservations(all)
   
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  return NextResponse.json(reservation)
 }
 
 export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { id, ...updates } = body
   
-  const { data, error } = await supabase
-    .from('reservations')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single()
+  const all = readReservations().map(r => r.id === id ? { ...r, ...updates } : r)
+  writeReservations(all)
   
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  const updated = all.find(r => r.id === id)
+  return NextResponse.json(updated)
 }
 
 export async function DELETE(req: NextRequest) {
@@ -51,8 +60,8 @@ export async function DELETE(req: NextRequest) {
   
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
   
-  const { error } = await supabase.from('reservations').delete().eq('id', id)
+  const all = readReservations().filter(r => r.id !== id)
+  writeReservations(all)
   
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
