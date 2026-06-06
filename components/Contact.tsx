@@ -1,3 +1,5 @@
+'use client'
+
 export default function Contact() {
   return (
     <section id="contact" className="bg-[#f7f4ef] relative">

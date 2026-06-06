@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Service } from '@/lib/services'
+import { getServices, DEFAULT_SERVICES, type Service } from '@/lib/services'
 
 export default function Services() {
-  const [services, setServices] = useState<Service[]>([])
+  const [services, setServices] = useState<Service[]>(DEFAULT_SERVICES.filter(s => s.visible))
 
   useEffect(() => {
-    fetch('/api/services').then(r => r.json()).then((data: Service[]) => setServices(data.filter(s => s.visible)))
+    setServices(getServices().filter(s => s.visible))
   }, [])
 
   return (
@@ -41,7 +41,7 @@ export default function Services() {
               </div>
               <div className="p-7">
                 <h3 className="text-2xl font-black text-[#062B37] mb-3" style={{ fontFamily:'Georgia,serif' }}>{svc.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed mb-6">{svc.description}</p>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">{svc.desc}</p>
                 <a href="#booking"
                   className="inline-flex items-center gap-2 bg-[#062B37] hover:bg-cyan-500 text-white font-bold px-6 py-3 rounded-full text-sm transition-all duration-300 hover:scale-105">
                   Book Experience <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
@@ -52,7 +52,6 @@ export default function Services() {
         </div>
       </div>
 
-      {/* Teal banner */}
       <div className="relative mt-10">
         <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-16 md:h-24 block">
           <path d="M0,50 C200,100 400,0 600,50 C800,100 1000,10 1200,55 C1320,80 1400,30 1440,50 L1440,0 L0,0 Z" fill="#f7f4ef" />

@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Reservation, ReservationStatus } from '@/lib/reservations'
-import type { Service } from '@/lib/services'
-import type { BannerSettings } from '@/lib/banner'
+import { getReservations, updateReservation, deleteReservation, type Reservation, type ReservationStatus } from '@/lib/reservations'
+import { getServices, saveServices, generateServiceId, DEFAULT_SERVICES, type Service } from '@/lib/services'
+import { getBanner, saveBanner, DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
 import ImageCropper from '@/components/ImageCropper'
 
 const PAYMENT_LABELS: Record<string, string> = { cash:'Cash', transfer:'Bank Transfer', edinar:'E-Dinar' }
@@ -349,7 +349,16 @@ function ServiceModal({ svc, onSave, onClose }: {
 }) {
   const blank: Service = { id:'', title:'', desc:'', price:'', basePrice:0, per:'per person', img:'', perPerson:true, hourly:false, visible:true }
   const [form, setForm] = useState<Service>(svc ? { ...blank, ...svc } : blank)
+  const [cropSrc, setCropSrc] = useState<string|null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   function f(k: keyof Service, v: unknown) { setForm(p=>({...p,[k]:v})) }
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => setCropSrc(ev.target?.result as string)
+    reader.readAsDataURL(file); e.target.value = ''
+  }
 
   function handleSave() {
     if (!form.title.trim()) return
@@ -359,64 +368,87 @@ function ServiceModal({ svc, onSave, onClose }: {
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-[28px] shadow-2xl p-8 w-full max-w-lg" style={{ animation:'popIn .3s cubic-bezier(.34,1.56,.64,1) both' }}>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-black text-slate-800">{form.id ? 'Edit Service' : 'Add Service'}</h3>
-          <button onClick={onClose} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xl transition-colors">×</button>
-        </div>
-        <div className="flex flex-col gap-4">
-          <input value={form.title} onChange={e=>f('title',e.target.value)} placeholder="Service title *"
-            className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
-          <textarea value={form.description} onChange={e=>f('description',e.target.value)} rows={2} placeholder="Description"
-            className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400 resize-none" />
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Base Price (DT)</label>
-              <input type="number" value={form.basePrice} onChange={e=>f('basePrice',Number(e.target.value))}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Price Label</label>
-              <input value={form.price} onChange={e=>f('price',e.target.value)} placeholder="e.g. 30 DT"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
-            </div>
+    <>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+        <div className="relative bg-white rounded-[28px] shadow-2xl p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto" style={{ animation:'popIn .3s cubic-bezier(.34,1.56,.64,1) both' }}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-black text-slate-800">{form.id ? 'Edit Service' : 'Add Service'}</h3>
+            <button onClick={onClose} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xl transition-colors">×</button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-4">
+            <input value={form.title} onChange={e=>f('title',e.target.value)} placeholder="Service title *"
+              className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
+            <textarea value={form.desc} onChange={e=>f('desc',e.target.value)} rows={2} placeholder="Description"
+              className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400 resize-none" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Base Price (DT)</label>
+                <input type="number" value={form.basePrice} onChange={e=>f('basePrice',Number(e.target.value))}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Price Label</label>
+                <input value={form.price} onChange={e=>f('price',e.target.value)} placeholder="e.g. 30 DT"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
+              </div>
+            </div>
+
+            {/* Image with cropper */}
+            <div>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Service Image</label>
+              {form.img && (
+                <div className="relative h-28 rounded-xl overflow-hidden mb-2 border border-slate-100">
+                  <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage:`url('${form.img}')` }} />
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+                <button onClick={()=>fileRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white flex-shrink-0 hover:opacity-90 transition-all"
+                  style={{ background:'linear-gradient(135deg,#062B37,#0a3d4f)' }}>
+                  📁 Choose & Crop
+                </button>
+                <input value={form.img.startsWith('data:') ? '(local image)' : form.img}
+                  onChange={e=>{ if(!e.target.value.startsWith('data:')) f('img',e.target.value) }}
+                  placeholder="or paste URL / /filename.jpg"
+                  className="flex-1 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-400 min-w-0" />
+              </div>
+            </div>
+
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Per label</label>
               <input value={form.per} onChange={e=>f('per',e.target.value)} placeholder="per person"
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
             </div>
-            <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Image URL</label>
-              <input value={form.img} onChange={e=>f('img',e.target.value)} placeholder="https://…"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-400" />
+            <div className="flex gap-6 flex-wrap">
+              <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={form.perPerson} onChange={e=>f('perPerson',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
+                Price × people
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={form.hourly} onChange={e=>f('hourly',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
+                Price × hours
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" checked={form.visible} onChange={e=>f('visible',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
+                Visible on site
+              </label>
             </div>
+            <button onClick={handleSave}
+              className="w-full py-3 rounded-xl font-black text-white text-sm transition-all hover:opacity-90"
+              style={{ background:'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
+              {form.id ? 'Save Changes' : 'Add Service'}
+            </button>
           </div>
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input type="checkbox" checked={form.perPerson} onChange={e=>f('perPerson',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
-              Price × people
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input type="checkbox" checked={form.hourly} onChange={e=>f('hourly',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
-              Price × hours
-            </label>
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input type="checkbox" checked={form.visible} onChange={e=>f('visible',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
-              Visible on site
-            </label>
-          </div>
-          <button onClick={handleSave}
-            className="w-full py-3 rounded-xl font-black text-white text-sm transition-all hover:opacity-90"
-            style={{ background:'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
-            {form.id ? 'Save Changes' : 'Add Service'}
-          </button>
         </div>
       </div>
-    </div>
+      {cropSrc && (
+        <ImageCropper src={cropSrc} aspectW={4} aspectH={3}
+          onDone={dataUrl=>{ f('img', dataUrl); setCropSrc(null) }}
+          onCancel={()=>setCropSrc(null)} />
+      )}
+    </>
   )
 }
 
@@ -569,7 +601,7 @@ export default function AdminDashboard() {
         .card-anim { animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both }
       `}</style>
 
-<div className="flex min-h-screen bg-slate-50" style={{ fontFamily:'Arial,sans-serif' }}>
+      <div className="flex min-h-screen bg-slate-50" style={{ fontFamily:'Arial,sans-serif' }}>
 
         {/* ── SIDEBAR (hidden on mobile) ── */}
         <aside className="hidden md:flex w-56 flex-shrink-0 flex flex-col sticky top-0 h-screen bg-white border-r border-slate-100 shadow-sm">
@@ -644,6 +676,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          <div className="flex-1 p-4 md:p-8 overflow-auto pb-24 md:pb-8">
             {/* ══ DASHBOARD TAB ══ */}
             {tab === 'dashboard' && (
               <div className="flex flex-col gap-8">
@@ -921,6 +954,22 @@ export default function AdminDashboard() {
       {selected && <Drawer res={selected} onClose={()=>setSelected(null)} onUpdate={handleUpdate} onDelete={handleDelete} />}
       {svcModal !== false && <ServiceModal svc={svcModal||null} onSave={handleSaveService} onClose={()=>setSvcModal(false)} />}
       {bannerModal && <BannerModal current={banner} onSave={handleSaveBanner} onClose={()=>setBannerModal(false)} />}
+
+      {/* Mobile bottom nav */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex z-40 shadow-lg">
+        {NAV.map(n=>(
+          <button key={n.id} onClick={()=>setTab(n.id)}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-semibold transition-colors
+              ${tab===n.id ? 'text-cyan-500' : 'text-slate-400'}`}>
+            <span className="text-lg">{n.icon}</span>
+            {n.label}
+          </button>
+        ))}
+        <button onClick={()=>router.push('/')}
+          className="flex-1 flex flex-col items-center gap-1 py-3 text-xs font-semibold text-slate-400">
+          <span className="text-lg">🌐</span>Site
+        </button>
+      </nav>
     </>
   )
 }
