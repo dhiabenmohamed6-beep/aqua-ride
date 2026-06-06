@@ -45,14 +45,14 @@ export default function Navbar() {
             : 'bg-white/80 backdrop-blur-md border-b border-slate-200/50'
           }`}
       >
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
 
           {/* Logo */}
           <a href="#home" className="flex items-center group">
             <img
               src="/logo.png"
               alt="AQUA RIDE"
-              className="object-contain h-14 w-auto transition-transform duration-300 group-hover:scale-105"
+              className="object-contain h-10 sm:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
               style={{ mixBlendMode: 'multiply' }}
               onError={(e) => {
                 const t = e.currentTarget as HTMLImageElement
@@ -61,7 +61,7 @@ export default function Navbar() {
                 if (fb) fb.style.display = 'block'
               }}
             />
-            <span className="text-3xl font-black" style={{ display: 'none' }}>
+            <span className="text-2xl sm:text-3xl font-black" style={{ display: 'none' }}>
               AQUA <span className="text-cyan-500">RIDE</span>
             </span>
           </a>
