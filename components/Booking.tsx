@@ -59,26 +59,26 @@ export default function Booking() {
         <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,10 1440,40 L1440,0 L0,0 Z" fill="#f7f4ef" />
       </svg>
 
-      <div className="max-w-7xl mx-auto px-6 py-24">
-        <div className="grid md:grid-cols-2 gap-12 items-start">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-24">
+        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-8 sm:gap-12 items-start">
           <div>
-            <p className="uppercase tracking-[5px] text-cyan-500 text-sm font-semibold mb-4">Reserve Your Experience</p>
-            <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black text-white mb-6" style={{ fontFamily: 'Georgia, serif' }}>
+            <p className="uppercase tracking-[3px] sm:tracking-[5px] text-cyan-500 text-xs sm:text-sm font-semibold mb-3 sm:mb-4">Reserve Your Experience</p>
+            <h2 className="text-[clamp(2rem,5vw,5rem)] font-black text-white mb-4 sm:mb-6" style={{ fontFamily: 'Georgia, serif' }}>
               Book Now
             </h2>
-            <p className="text-slate-400 text-lg leading-relaxed mb-10">
+            <p className="text-slate-400 text-sm sm:text-lg leading-relaxed mb-8 sm:mb-10 hidden sm:block">
               Fill the form below to reserve your perfect sea adventure. We'll confirm your booking within hours.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-sm rounded-[32px] p-8 border border-white/10">
-            <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-sm rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 border border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
               <input
                 name="name"
                 value={form.name}
                 onChange={handleChange}
                 placeholder="Full Name"
-                className="md:col-span-2 w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="sm:col-span-2 w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
                 required
               />
               <input
@@ -86,7 +86,7 @@ export default function Booking() {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="Phone Number"
-                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
                 required
               />
               <input
@@ -95,14 +95,14 @@ export default function Booking() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Email"
-                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
                 required
               />
               <select
                 name="service"
                 value={form.service}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
                 required
               >
                 <option value="" className="bg-[#062B37]">Select Service</option>
@@ -115,14 +115,14 @@ export default function Booking() {
                 type="date"
                 value={form.date}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
                 required
               />
               <select
                 name="time"
                 value={form.time}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
                 required
               >
                 <option value="" className="bg-[#062B37]">Select Time</option>
@@ -137,13 +137,13 @@ export default function Booking() {
                 value={form.people}
                 onChange={handleChange}
                 placeholder="Number of People"
-                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
               />
               <select
                 name="payment"
                 value={form.payment}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400"
+                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
               >
                 <option value="cash" className="bg-[#062B37]">Cash</option>
                 <option value="transfer" className="bg-[#062B37]">Bank Transfer</option>
@@ -156,11 +156,11 @@ export default function Booking() {
               onChange={handleChange}
               placeholder="Special requests..."
               rows={3}
-              className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-400 resize-none mb-6"
+              className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 resize-none mb-4 sm:mb-6 text-sm sm:text-base"
             />
             <button
               type="submit"
-              className="w-full py-4 rounded-2xl font-black text-white text-lg transition-all hover:scale-[1.02] active:scale-[.98]"
+              className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-white text-base sm:text-lg transition-all hover:scale-[1.02] active:scale-[.98]"
               style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', boxShadow: '0 8px 32px rgba(6,182,212,.35)' }}
             >
               Submit Booking →
