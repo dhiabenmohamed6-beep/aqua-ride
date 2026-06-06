@@ -655,7 +655,7 @@ export default function AdminDashboard() {
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search…"
                   className="pl-9 pr-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:outline-none focus:border-cyan-400 w-56" />
               </div>
-              <button onClick={refresh} className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-cyan-500 hover:border-cyan-300 transition-all">↻</button>
+              <button onClick={refreshReservations} className="w-10 h-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-cyan-500 hover:border-cyan-300 transition-all">↻</button>
             </div>
           </header>
 
@@ -818,36 +818,11 @@ export default function AdminDashboard() {
                     </button>
                   ))}
                 </div>
-<div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden">
+                <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden">
                   {visible.length===0 ? (
                     <div className="py-20 text-center"><p className="text-4xl mb-3">🌊</p><p className="text-slate-400 font-semibold">No reservations found</p></div>
                   ) : (
-                    <div className="block md:hidden">
-                      {visible.map(r=>{
-                        const sm = STATUS_META[r.status]
-                        const disc = Math.round(r.total*(1-r.discount/100))
-                        return (
-                          <div key={r.id} onClick={()=>setSelected(r)}
-                            className="border-b border-slate-100 p-4 cursor-pointer hover:bg-slate-50 transition-colors">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <Avatar name={r.name} />
-                                <span className="font-bold text-slate-800 text-sm">{r.name}</span>
-                              </div>
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${sm.light}`}>
-                                <span className={`w-1 h-1 rounded-full ${sm.dot}`}/>{r.status}
-                              </span>
-                            </div>
-                            <div className="text-xs text-slate-500 space-y-1">
-                              <p><span className="font-medium">Service:</span> {r.serviceLabel}</p>
-                              <p><span className="font-medium">Date:</span> {r.date} • {r.time}</p>
-                              <p><span className="font-medium">Total:</span> {disc} DT</p>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <div className="hidden md:block overflow-x-auto">
+                    <div className="overflow-x-auto">
                       <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-100">
                           <tr>{['Client','Service','Date & Time','People','Total','Payment','Status',''].map(h=>(
@@ -898,27 +873,27 @@ export default function AdminDashboard() {
 
             {/* ══ SERVICES TAB ══ */}
 {tab === 'services' && (
-               <div className="flex flex-col gap-5">
-                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                   <div>
-                     <h2 className="text-xl font-black text-slate-800">Manage Services</h2>
-                     <p className="text-slate-400 text-sm">Add, edit or hide services shown on the public site</p>
-                   </div>
-                   <div className="flex flex-wrap gap-2">
-                     <button onClick={()=>setBannerModal(true)}
-                       className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90"
-                       style={{ background:'linear-gradient(135deg,#062B37,#0a3d4f)' }}>
-                       🖼 Edit Banner
-                     </button>
-                     <button onClick={()=>setSvcModal({})}
-                       className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90"
-                       style={{ background:'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
-                       + Add Service
-                     </button>
-                   </div>
-                 </div>
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-800">Manage Services</h2>
+                    <p className="text-slate-400 text-sm">Add, edit or hide services shown on the public site</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={()=>setBannerModal(true)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90"
+                      style={{ background:'linear-gradient(135deg,#062B37,#0a3d4f)' }}>
+                      🖼 Edit Banner
+                    </button>
+                    <button onClick={()=>setSvcModal({})}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90"
+                      style={{ background:'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
+                      + Add Service
+                    </button>
+                  </div>
+                </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {services.map(svc=>(
                     <div key={svc.id} className={`bg-white rounded-[20px] shadow-sm border overflow-hidden transition-all ${svc.visible?'border-slate-100':'border-slate-200 opacity-60'}`}>
                       <div className="h-36 bg-cover bg-center relative" style={{ backgroundImage:`url('${svc.img||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800'}')` }}>
