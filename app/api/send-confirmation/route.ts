@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
-import fs from 'fs'
-import path from 'path'
+import { Resend } from 'resend'
 
 const PAYMENT_LABELS: Record<string, string> = {
   cash:     'Cash',
@@ -41,13 +39,8 @@ function buildEmailHtml(data: {
         <!-- Header -->
         <tr>
           <td style="background:linear-gradient(135deg,#062B37 0%,#0a3d4f 100%);border-radius:24px 24px 0 0;padding:40px 40px 32px;text-align:center;">
-            <img
-              src="cid:aquaride-logo"
-              alt="AQUA-RIDE"
-              width="200"
-              style="display:block;margin:0 auto 16px;max-width:200px;filter:brightness(0) invert(1);"
-            />
-            <p style="margin:0;color:rgba(255,255,255,.6);font-size:13px;letter-spacing:4px;text-transform:uppercase;">
+            <h1 style="margin:0;color:#fff;font-size:32px;font-weight:900;letter-spacing:3px;">AQUA <span style="color:#06b6d4;">RIDE</span></h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,.6);font-size:13px;letter-spacing:4px;text-transform:uppercase;">
               Luxury Sea Experiences · Tunisia
             </p>
           </td>
@@ -181,27 +174,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    })
+    const resend = new Resend(process.env.RESEND_API_KEY)
 
-    const logoPath = path.join(process.cwd(), 'public', 'logo.png')
-    const logoExists = fs.existsSync(logoPath)
-
-    await transporter.sendMail({
-      from: `"AQUA RIDE" <${process.env.GMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'AQUA RIDE <bookings@aquaride.tn>',
       to: email,
       subject: `✅ Booking Confirmed – ${serviceLabel} on ${date}`,
       html: buildEmailHtml({ name, email, serviceLabel, date, time, people, hours, payment, total, discount, id, adminNote }),
-      attachments: logoExists ? [{
-        filename: 'logo.png',
-        path: logoPath,
-        cid: 'aquaride-logo',
-      }] : [],
     })
 
     return NextResponse.json({ success: true })
