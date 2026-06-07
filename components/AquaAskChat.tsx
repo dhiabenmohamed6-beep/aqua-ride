@@ -10,15 +10,26 @@ interface ChatMessage {
 }
 
 const FAQ_RESPONSES: Record<string, string> = {
-  'service|offering|offer': 'We offer premium sea experiences including: Balade en Mer, Pack Complet, Excursion Privée, Demande de Mariage, Anniversaire, and Premium Private Tour.',
-  'price|cost|dt|payment|cash': 'Our prices start from 30 DT per person. Payment options include Cash, Bank Transfer, and E-Dinar. Full pricing is shown when you select a service in the booking form.',
-  'booking|reserve|book|availability': 'You can book directly through our booking form. We typically respond within hours to confirm your reservation.',
-  'time|hour|duration': 'Tours typically run from 09:00 to 18:00. Private tours can be customized to your schedule.',
-  'location|where|address|el haouaria|nabeul|tunisia': 'We are located in El Haouaria, Nabeul, Tunisia - right on the Mediterranean Sea.',
-  'contact|phone|email|whatsapp': 'Call us at +216 23 251 023 or WhatsApp +216 93 003 251. Email: aquaride@gmail.com',
-  'image|photo|picture': 'You can see our services and experiences in the Services section above with beautiful photos.',
-  'hello|hi|hey|greetings': 'Hello! I\'m AQUA ASK, your virtual assistant. How can I help you today?',
-  'default': 'I can help with bookings, services, pricing, and general questions. For more details, check our website sections above or contact us directly!'
+  'balade|sea ride|sea walk|relaxing': 'Balade en Mer is a relaxing sea stroll along the Tunisian coastline - perfect for families and couples. Price: 30 DT per person.',
+  'pack|complete|full experience': 'Pack Complet includes the full experience - sea tour, snorkeling, and sunset cruise. Price: 90 DT per person.',
+  'excursion|private tour|private boat': 'Excursion Privée gives you your own private boat on your schedule to explore hidden coves and secret beaches. Price: 300 DT per hour.',
+  'mariage|marriage|proposal|wedding|proposal on sea': 'Demande de Mariage lets you propose on the open sea with luxury setup, flowers, and photographer. Price: 500 DT for full package.',
+  'anniversary|anniv|birthday|celebration': 'Anniversaire celebration on the water with custom decoration and cake. Price starts at 200 DT.',
+  'premium|vip|luxury|champagne': 'Premium Private Tour is the ultimate luxury experience - VIP boat, champagne, and personal guide. Price: 1000 DT per hour.',
+  'price|cost|dt|payment|cash|expensive|cheap': 'Prices: Balade 30 DT, Pack 90 DT, Excursion 300 DT/h, Anniversaire 200 DT, Mariage 500 DT, Premium 1000 DT/h. Payment: Cash, Bank Transfer, E-Dinar.',
+  'booking|reserve|book|availability|schedule': 'Book via the form above. We respond within hours. For immediate booking, call +216 23 251 023.',
+  'time|hour|duration|when|open|departure': 'Tours run 09:00-18:00. Private tours customizable. Bookings available daily.',
+  'location|where|address|el haouaria|nabeul|tunisia|marina|port': 'Located in El Haouaria, Nabeul, Tunisia on the Mediterranean Sea. We meet at the main marina.',
+  'contact|phone|email|whatsapp|call': 'Call +216 23 251 023, WhatsApp +216 93 003 251, or email aquaride@gmail.com. Available 8:00-20:00 daily.',
+  'safety|life jacket|equipment|secure|safe': 'All tours include safety equipment, life jackets for all sizes. Our boats are certified and captains are licensed professionals.',
+  'snorkeling|snorkel|swim|fish|fish viewing': 'Snorkeling gear provided for sea tours. Crystal clear waters with abundant marine life.',
+  'what to bring|towel|sunscreen|clothes': 'Bring swimwear, towel, sunscreen, and water. We provide safety equipment and refreshments.',
+  'cancellation|refund|change|modify': 'Free cancellation up to 24 hours before. Contact us to modify your booking.',
+  'group|family|couple|friends|party': 'Balade and Pack perfect for families/couples. Private tours accommodate 2-12 people. Large groups contact us directly.',
+  'photo|photography|camera|underwater': 'Bring your camera! We also provide professional photography for special events (wedding proposals, anniversaries).',
+  'hello|hi|hey|greetings|good morning|good evening': 'Hello! 🌊 I\'m AQUA ASK, your virtual assistant. Ask me about our services, prices, booking, or anything else!',
+  'thank|thanks|appreciate': 'You\'re welcome! Need more help? Feel free to ask or contact us directly.',
+  'default': 'I can help with our services, pricing, booking, location, safety, what to bring, and more. For special requests, contact us at +216 23 251 023 or use the booking form!'
 }
 
 export default function AquaAskChat() {
