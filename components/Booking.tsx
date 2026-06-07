@@ -17,6 +17,7 @@ export default function Booking() {
     hours: 1,
     message: '',
     payment: 'cash',
+    food: '',
   })
   const [showSuccess, setShowSuccess] = useState(false)
   const [submittedPrice, setSubmittedPrice] = useState(0)
@@ -25,7 +26,7 @@ export default function Booking() {
     setServices(getServices().filter(s => s.visible))
   }, [])
 
-  const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']
+  const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00']
 
   const selectedService = services.find(s => s.id === form.service)
   const calculatedPrice = selectedService 
@@ -178,6 +179,19 @@ export default function Booking() {
                   placeholder="Number of Hours"
                   className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 />
+              )}
+
+              {selectedService?.hasFood && (
+                <select
+                  name="food"
+                  value={form.food}
+                  onChange={handleChange}
+                  className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                >
+                  <option value="" className="bg-[#062B37]">Select Food Type</option>
+                  <option value="escalope" className="bg-[#062B37]">Escalope</option>
+                  <option value="dorade" className="bg-[#062B37]">Dorade (Sea Bream)</option>
+                </select>
               )}
 
               <select

@@ -9,11 +9,12 @@ export interface Service {
   perPerson: boolean
   hourly: boolean
   visible: boolean
+  hasFood?: boolean
 }
 
 export const DEFAULT_SERVICES: Service[] = [
    { id:'balade',    title:'Balade en Mer',       desc:'A relaxing sea stroll along the Tunisian coastline. Perfect for families and couples.',        price:'30 DT',   basePrice:30,   per:'per person',   img:'/balade.jpg', perPerson:true,  hourly:false, visible:true },
-   { id:'pack',      title:'Pack Complet',         desc:'The full experience — sea tour, snorkeling, and a sunset cruise all in one package.',          price:'90 DT',   basePrice:90,   per:'per person',   img:'/pack.jpg', perPerson:true,  hourly:false, visible:true },
+   { id:'pack',      title:'Pack Complet',         desc:'The full experience — sea tour, snorkeling, and a sunset cruise all in one package.',          price:'90 DT',   basePrice:90,   per:'per person',   img:'/pack.jpg', perPerson:true,  hourly:false, visible:true, hasFood:true },
    { id:'excursion', title:'Excursion Privée',     desc:'Your own private boat, your own schedule. Explore hidden coves and secret beaches.',           price:'300 DT',  basePrice:300,  per:'per hour',     img:'/privee.jpg', perPerson:false, hourly:true,  visible:true },
    { id:'mariage',   title:'Demande de Mariage',   desc:'Propose on the open sea with a luxury setup, flowers, and a photographer.',                   price:'500 DT',  basePrice:500,  per:'full package', img:'/demande.jpg', perPerson:false, hourly:false, visible:true },
    { id:'anniv',     title:'Anniversaire',         desc:'Celebrate your special day on the water with a custom decoration and cake.',                  price:'Custom',  basePrice:200,  per:'tailored',     img:'/anniver.jpg', perPerson:true,  hourly:false, visible:true },
