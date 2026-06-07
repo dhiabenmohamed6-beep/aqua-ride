@@ -3,6 +3,7 @@ import Hero from '@/components/Hero'
 import Services from '@/components/Services'
 import Booking from '@/components/Booking'
 import Contact from '@/components/Contact'
+import AquaAskChat from '@/components/AquaAskChat'
 
 export default function HomePage(){
 return(
@@ -12,6 +13,7 @@ return(
 <Services/>
 <Booking/>
 <Contact/>
+<AquaAskChat/>
 </main>
 )
 }
