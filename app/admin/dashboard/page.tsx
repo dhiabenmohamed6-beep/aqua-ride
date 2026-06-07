@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
 import { getReservations, updateReservation, deleteReservation, type Reservation, type ReservationStatus } from '@/lib/reservations'
 import { getServices, saveServices, generateServiceId, DEFAULT_SERVICES, type Service } from '@/lib/services'
@@ -153,7 +154,10 @@ function Drawer({ res, onClose, onUpdate, onDelete }: {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Client</p>
             <div className="grid grid-cols-2 gap-y-3 text-sm">
               {[['Name',res.name],['Phone',res.phone],['Email',res.email]].map(([l,v])=>(
-                <><span key={l+'l'} className="text-slate-500">{l}</span><span key={l+'v'} className="font-semibold text-slate-800 truncate">{v}</span></>
+                <React.Fragment key={l}>
+                  <span className="text-slate-500">{l}</span>
+                  <span className="font-semibold text-slate-800 truncate">{v}</span>
+                </React.Fragment>
               ))}
             </div>
           </div>
@@ -166,7 +170,10 @@ function Drawer({ res, onClose, onUpdate, onDelete }: {
                 ['Payment',PAYMENT_LABELS[res.payment]??res.payment],['Submitted',new Date(res.createdAt).toLocaleDateString()],
                 ...(res.hours>1?[['Duration',`${res.hours}h`]]:[])
               ].map(([l,v])=>(
-                <><span key={l+'l'} className="text-slate-500">{l}</span><span key={l+'v'} className="font-semibold text-slate-800">{v}</span></>
+                <React.Fragment key={l}>
+                  <span className="text-slate-500">{l}</span>
+                  <span className="font-semibold text-slate-800">{v}</span>
+                </React.Fragment>
               ))}
             </div>
           </div>
@@ -258,7 +265,7 @@ function BannerModal({ current, onSave, onClose }: {
 
           {/* Live preview */}
           <div className="relative rounded-2xl overflow-hidden mb-6 h-36"
-            style={{ backgroundImage:`url('${form.imageUrl||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800'}')`, backgroundSize:'cover', backgroundPosition:'center' }}>
+            style={{ backgroundImage:`url('${form.imageUrl||'/bunner.png'}')`, backgroundSize:'cover', backgroundPosition:'center' }}>
             <div className="absolute inset-0" style={{ background:'linear-gradient(to bottom,rgba(6,43,55,.6),rgba(6,43,55,.3))' }} />
             <div className="relative z-10 p-5">
               <p className="text-white font-black text-2xl leading-tight">{form.title||'Title'}</p>
@@ -685,7 +692,7 @@ export default function AdminDashboard() {
                 <div className="relative rounded-[24px] overflow-hidden card-anim"
                   style={{ background:'linear-gradient(135deg,#062B37 0%,#06b6d4 100%)', minHeight:'130px' }}>
                   <div className="absolute inset-0 opacity-10 bg-cover bg-center"
-                    style={{ backgroundImage:"url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2070')" }} />
+                    style={{ backgroundImage:"url('/bunner.png')" }} />
                   <div className="relative z-10 p-8">
                     <p className="text-cyan-200 text-sm mb-1">Welcome back 👋</p>
                     <h2 className="text-3xl font-black text-white">AQUA RIDE Dashboard</h2>
@@ -896,7 +903,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {services.map(svc=>(
                     <div key={svc.id} className={`bg-white rounded-[20px] shadow-sm border overflow-hidden transition-all ${svc.visible?'border-slate-100':'border-slate-200 opacity-60'}`}>
-                      <div className="h-36 bg-cover bg-center relative" style={{ backgroundImage:`url('${svc.img||'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800'}')` }}>
+                      <div className="h-36 bg-cover bg-center relative" style={{ backgroundImage:`url('${svc.img||'/pack.jpg'}')` }}>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                         <div className="absolute top-3 right-3 flex gap-2">
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${svc.visible?'bg-cyan-500 text-white':'bg-slate-200 text-slate-500'}`}>

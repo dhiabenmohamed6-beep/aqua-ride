@@ -8,13 +8,13 @@ export interface BannerSettings {
 }
 
 export const DEFAULT_BANNER: BannerSettings = {
-  imageUrl:     'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2070',
-  title:        'Discover',
-  subtitle:     'the Sea',
-  description:  'Hidden caves, crystal-clear waters, private tours, and unforgettable luxury moments on the Mediterranean.',
-  btnPrimary:   'Book Now',
-  btnSecondary: 'Explore Services',
-}
+   imageUrl:     '/bunner.png',
+   title:        'Discover',
+   subtitle:     'the Sea',
+   description:  'Hidden caves, crystal-clear waters, private tours, and unforgettable luxury moments on the Mediterranean.',
+   btnPrimary:   'Book Now',
+   btnSecondary: 'Explore Services',
+ }
 
 const KEY = 'aqua_banner'
 

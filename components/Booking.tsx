@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { getServices, type Service } from '@/lib/services'
+import { generateId } from '@/lib/reservations'
 
 export default function Booking() {
   const [services, setServices] = useState<Service[]>([])
@@ -24,33 +25,43 @@ export default function Booking() {
 
   const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']
 
+  const selectedService = services.find(s => s.id === form.service)
+  const calculatedPrice = selectedService 
+    ? selectedService.hourly 
+      ? selectedService.basePrice * form.hours 
+      : selectedService.perPerson 
+        ? selectedService.basePrice * form.people 
+        : selectedService.basePrice
+    : 0
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
-    setForm(f => ({ ...f, [name]: value }))
+    setForm(f => ({ ...f, [name]: name === 'people' || name === 'hours' ? Number(value) : value }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const svc = services.find(s => s.id === form.service)
-    if (!svc) return
+    if (!selectedService) return
 
-    const price = svc.hourly ? svc.basePrice * form.hours : svc.perPerson ? svc.basePrice * form.people : svc.basePrice
+    const reservation = {
+      ...form,
+      id: generateId(),
+      createdAt: new Date().toISOString(),
+      serviceLabel: selectedService.title,
+      total: calculatedPrice,
+      status: 'pending',
+      adminNote: '',
+      discount: 0,
+    }
 
     await fetch('/api/reservations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        serviceLabel: svc.title,
-        total: price,
-        status: 'pending',
-        adminNote: '',
-        discount: 0,
-      }),
+      body: JSON.stringify(reservation),
     })
 
     setForm({ ...form, name: '', phone: '', email: '', message: '' })
-    alert('Reservation submitted!')
+    alert(`Reservation submitted! Total: ${calculatedPrice} DT`)
   }
 
   return (
@@ -139,6 +150,17 @@ export default function Booking() {
                 placeholder="Number of People"
                 className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
               />
+              {selectedService?.hourly && (
+                <input
+                  name="hours"
+                  type="number"
+                  min={1}
+                  value={form.hours}
+                  onChange={handleChange}
+                  placeholder="Number of Hours"
+                  className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                />
+              )}
               <select
                 name="payment"
                 value={form.payment}
@@ -158,6 +180,13 @@ export default function Booking() {
               rows={3}
               className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 resize-none mb-4 sm:mb-6 text-sm sm:text-base"
             />
+            {selectedService && (
+              <div className="mb-4 p-4 bg-cyan-500/20 rounded-xl border border-cyan-400/30">
+                <p className="text-cyan-300 text-xs uppercase tracking-wider mb-1">Total Price</p>
+                <p className="text-white text-2xl font-black">{calculatedPrice} DT</p>
+                <p className="text-white/60 text-xs">{selectedService.perPerson && '× ' + form.people + ' person' + (form.people > 1 ? 's' : '')}{selectedService.hourly && '× ' + form.hours + ' hour' + (form.hours > 1 ? 's' : '')}</p>
+              </div>
+            )}
             <button
               type="submit"
               className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-white text-base sm:text-lg transition-all hover:scale-[1.02] active:scale-[.98]"
