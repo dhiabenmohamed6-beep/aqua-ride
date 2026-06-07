@@ -18,6 +18,8 @@ export default function Booking() {
     message: '',
     payment: 'cash',
   })
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [submittedPrice, setSubmittedPrice] = useState(0)
 
   useEffect(() => {
     setServices(getServices().filter(s => s.visible))
@@ -60,80 +62,94 @@ export default function Booking() {
       body: JSON.stringify(reservation),
     })
 
+    setSubmittedPrice(calculatedPrice)
     setForm({ ...form, name: '', phone: '', email: '', message: '' })
-    alert(`Reservation submitted! Total: ${calculatedPrice} DT`)
+    setShowSuccess(true)
+    setTimeout(() => setShowSuccess(false), 5000)
   }
 
   return (
-    <section id="booking" className="bg-[#062B37] relative">
-      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" className="w-full h-12 md:h-20 block -mb-1 rotate-180">
-        <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,10 1440,40 L1440,0 L0,0 Z" fill="#f7f4ef" />
+    <section id="booking" className="bg-gradient-to-b from-[#062B37] to-[#0a3d4f] relative">
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-400 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-cyan-500 rounded-full blur-3xl" />
+      </div>
+
+      <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-12 md:h-20 block -mb-1">
+        <path d="M0,60 C180,120 360,0 540,60 C720,120 900,20 1080,70 C1260,120 1380,40 1440,60 L1440,0 L0,0 Z" fill="#f7f4ef" />
       </svg>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-24">
-        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-8 sm:gap-12 items-start">
-          <div>
-            <p className="uppercase tracking-[3px] sm:tracking-[5px] text-cyan-500 text-xs sm:text-sm font-semibold mb-3 sm:mb-4">Reserve Your Experience</p>
-            <h2 className="text-[clamp(2rem,5vw,5rem)] font-black text-white mb-4 sm:mb-6" style={{ fontFamily: 'Georgia, serif' }}>
-              Book Now
-            </h2>
-            <p className="text-slate-400 text-sm sm:text-lg leading-relaxed mb-8 sm:mb-10 hidden sm:block">
-              Fill the form below to reserve your perfect sea adventure. We'll confirm your booking within hours.
-            </p>
-          </div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-24">
+        <div className="text-center mb-8 sm:mb-12">
+          <p className="uppercase tracking-[5px] text-cyan-400 text-xs sm:text-sm font-semibold mb-3">Reserve Your Experience</p>
+          <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black text-white mb-4" style={{ fontFamily: 'Georgia, serif' }}>
+            Book Now
+          </h2>
+          <p className="text-white/70 text-sm sm:text-lg max-w-2xl mx-auto">
+            Fill the form below to reserve your perfect sea adventure. We'll contact you soon to confirm your booking.
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-sm rounded-[24px] sm:rounded-[32px] p-5 sm:p-8 border border-white/10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Full Name"
-                className="sm:col-span-2 w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
-                required
-              />
+        <div className="max-w-3xl mx-auto">
+          <form onSubmit={handleSubmit} className="relative bg-white/10 backdrop-blur-xl rounded-[32px] p-8 sm:p-12 border border-white/20 shadow-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+              <div className="md:col-span-2">
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
+                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                  required
+                />
+              </div>
+              
               <input
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="Phone Number"
-                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 required
               />
+              
               <input
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="Email"
-                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                placeholder="Email Address"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 required
               />
+
               <select
                 name="service"
                 value={form.service}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 required
               >
                 <option value="" className="bg-[#062B37]">Select Service</option>
                 {services.map(s => (
-                  <option key={s.id} value={s.id} className="bg-[#062B37]">{s.title}</option>
+                  <option key={s.id} value={s.id} className="bg-[#062B37]">{s.title} - {s.price}</option>
                 ))}
               </select>
+
               <input
                 name="date"
                 type="date"
                 value={form.date}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 required
               />
+
               <select
                 name="time"
                 value={form.time}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 required
               >
                 <option value="" className="bg-[#062B37]">Select Time</option>
@@ -141,6 +157,7 @@ export default function Booking() {
                   <option key={t} value={t} className="bg-[#062B37]">{t}</option>
                 ))}
               </select>
+
               <input
                 name="people"
                 type="number"
@@ -148,8 +165,9 @@ export default function Booking() {
                 value={form.people}
                 onChange={handleChange}
                 placeholder="Number of People"
-                className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
               />
+
               {selectedService?.hourly && (
                 <input
                   name="hours"
@@ -158,45 +176,86 @@ export default function Booking() {
                   value={form.hours}
                   onChange={handleChange}
                   placeholder="Number of Hours"
-                  className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
                 />
               )}
+
               <select
                 name="payment"
                 value={form.payment}
                 onChange={handleChange}
-                className="w-full border border-white/20 bg-white/10 text-white rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 text-sm sm:text-base"
+                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
               >
                 <option value="cash" className="bg-[#062B37]">Cash</option>
                 <option value="transfer" className="bg-[#062B37]">Bank Transfer</option>
                 <option value="edinar" className="bg-[#062B37]">E-Dinar</option>
               </select>
             </div>
+
             <textarea
               name="message"
               value={form.message}
               onChange={handleChange}
               placeholder="Special requests..."
               rows={3}
-              className="w-full border border-white/20 bg-white/10 text-white placeholder-white/40 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 focus:outline-none focus:border-cyan-400 resize-none mb-4 sm:mb-6 text-sm sm:text-base"
+              className="w-full h-32 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-400 resize-none mb-6 text-base"
             />
-            {selectedService && (
-              <div className="mb-4 p-4 bg-cyan-500/20 rounded-xl border border-cyan-400/30">
-                <p className="text-cyan-300 text-xs uppercase tracking-wider mb-1">Total Price</p>
-                <p className="text-white text-2xl font-black">{calculatedPrice} DT</p>
-                <p className="text-white/60 text-xs">{selectedService.perPerson && '× ' + form.people + ' person' + (form.people > 1 ? 's' : '')}{selectedService.hourly && '× ' + form.hours + ' hour' + (form.hours > 1 ? 's' : '')}</p>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 p-6 bg-cyan-500/20 rounded-2xl border border-cyan-400/30">
+              <div>
+                <p className="text-cyan-300 text-xs uppercase tracking-widest mb-1">Total Price</p>
+                <p className="text-white text-3xl font-black">{calculatedPrice} DT</p>
+                {selectedService && (
+                  <p className="text-white/60 text-sm mt-1">
+                    {selectedService.perPerson && `× ${form.people} person${form.people > 1 ? 's' : ''}`}
+                    {selectedService.hourly && `× ${form.hours} hour${form.hours > 1 ? 's' : ''}`}
+                  </p>
+                )}
               </div>
-            )}
+              {selectedService && (
+                <div className="text-right mt-3 sm:mt-0">
+                  <p className="text-white/50 text-xs">{selectedService.title}</p>
+                  <p className="text-cyan-300 font-semibold">{selectedService.price}</p>
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
-              className="w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-black text-white text-base sm:text-lg transition-all hover:scale-[1.02] active:scale-[.98]"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', boxShadow: '0 8px 32px rgba(6,182,212,.35)' }}
+              className="w-full h-14 rounded-2xl font-black text-white text-lg transition-all hover:scale-[1.02] active:scale-[.98] shadow-lg shadow-cyan-500/25"
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)' }}
             >
-              Submit Booking →
+              Confirm Booking
             </button>
           </form>
+
+          {showSuccess && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+              <div className="bg-white rounded-3xl p-10 text-center max-w-md w-full shadow-2xl transform animate-bounce-in">
+                <div className="w-20 h-20 bg-cyan-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-4xl text-white">✓</span>
+                </div>
+                <h3 className="text-3xl font-black text-slate-800 mb-3">Booking Confirmed!</h3>
+                <p className="text-slate-500 mb-2">Total: <strong className="text-cyan-600">{submittedPrice} DT</strong></p>
+                <p className="text-slate-500 text-sm">We'll contact you soon to confirm your reservation.</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      <svg viewBox="0 0 1440 100" preserveAspectRatio="none" className="w-full h-12 md:h-20 block -mt-1 rotate-180">
+        <path d="M0,60 C180,0 360,120 540,60 C720,0 900,100 1080,50 C1260,0 1380,80 1440,60 L1440,100 L0,100 Z" fill="#f7f4ef" />
+      </svg>
+
+      <style jsx>{`
+        @keyframes bounce-in {
+          0% { opacity: 0; transform: scale(0.8); }
+          50% { transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-bounce-in { animation: bounce-in 0.5s ease-out; }
+      `}</style>
     </section>
   )
 }
