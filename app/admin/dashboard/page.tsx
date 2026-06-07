@@ -7,6 +7,7 @@ import { getReservations, updateReservation, deleteReservation, type Reservation
 import { getServices, saveServices, generateServiceId, DEFAULT_SERVICES, type Service } from '@/lib/services'
 import { getBanner, saveBanner, DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
 import ImageCropper from '@/components/ImageCropper'
+import type { ContactMessage } from '@/app/api/messages/route'
 
 const PAYMENT_LABELS: Record<string, string> = { cash:'Cash', transfer:'Bank Transfer', edinar:'E-Dinar' }
 
@@ -463,7 +464,7 @@ function ServiceModal({ svc, onSave, onClose }: {
 export default function AdminDashboard() {
   const router = useRouter()
   const [ready, setReady]               = useState(false)
-  const [tab, setTab]                   = useState<'dashboard'|'reservations'|'services'>('dashboard')
+  const [tab, setTab]                   = useState<'dashboard'|'reservations'|'services'|'messages'>('dashboard')
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [services, setServices]         = useState<Service[]>([])
   const [selected, setSelected]         = useState<Reservation|null>(null)
@@ -473,25 +474,29 @@ export default function AdminDashboard() {
   const [bannerModal, setBannerModal]   = useState(false)
   const [banner, setBannerState]        = useState<BannerSettings>(DEFAULT_BANNER)
   const [mobileMenu, setMobileMenu]     = useState(false)
+  const [messages, setMessages]         = useState<ContactMessage[]>([])
 
   useEffect(() => {
     async function loadData() {
       if (localStorage.getItem('aqua_admin') !== 'true') { router.replace('/admin/login'); return }
       setReady(true)
       
-      const [resRes, svcRes, banRes] = await Promise.all([
+      const [resRes, svcRes, banRes, msgRes] = await Promise.all([
         fetch('/api/reservations'),
         fetch('/api/services'),
-        fetch('/api/banner')
+        fetch('/api/banner'),
+        fetch('/api/messages')
       ])
       
       const reservationsData = await resRes.json()
       const servicesData = await svcRes.json()
       const bannerData = await banRes.json()
+      const messagesData = await msgRes.json()
       
       setReservations(reservationsData)
       setServices(servicesData)
       setBannerState(bannerData)
+      setMessages(messagesData)
     }
     loadData()
   }, [router])
@@ -597,6 +602,7 @@ export default function AdminDashboard() {
     { id:'dashboard',    icon:'⊞', label:'Dashboard'    },
     { id:'reservations', icon:'📋', label:'Reservations' },
     { id:'services',     icon:'🚤', label:'Services'     },
+    { id:'messages',     icon:'✉️', label:'Messages'     },
   ] as const
 
   return (
@@ -944,17 +950,73 @@ export default function AdminDashboard() {
                     </div>
                   ))}
 
-                  {/* Add new card */}
-                  <button onClick={()=>setSvcModal({})}
-                    className="bg-white rounded-[20px] border-2 border-dashed border-slate-200 hover:border-cyan-300 hover:bg-cyan-50/30 transition-all flex flex-col items-center justify-center gap-3 p-10 text-slate-400 hover:text-cyan-500 min-h-[280px]">
-                    <span className="text-4xl">+</span>
-                    <span className="font-bold text-sm">Add New Service</span>
-                  </button>
-                </div>
-              </div>
-            )}
+{/* Add new card */}
+                   <button onClick={()=>setSvcModal({})}
+                     className="bg-white rounded-[20px] border-2 border-dashed border-slate-200 hover:border-cyan-300 hover:bg-cyan-50/30 transition-all flex flex-col items-center justify-center gap-3 p-10 text-slate-400 hover:text-cyan-500 min-h-[280px]">
+                     <span className="text-4xl">+</span>
+                     <span className="font-bold text-sm">Add New Service</span>
+                   </button>
+                 </div>
+               </div>
+             )}
 
-          </div>
+             {/* ══ MESSAGES TAB ══ */}
+             {tab === 'messages' && (
+               <div className="flex flex-col gap-5">
+                 <div>
+                   <h2 className="text-xl font-black text-slate-800 mb-1">Contact Messages</h2>
+                   <p className="text-slate-400 text-sm">Messages from the website contact form</p>
+                 </div>
+                 
+                 {messages.length === 0 ? (
+                   <div className="py-20 text-center">
+                     <p className="text-4xl mb-3">✉️</p>
+                     <p className="text-slate-400 font-semibold">No messages yet</p>
+                   </div>
+                 ) : (
+                   <div className="flex flex-col gap-4">
+                     {messages.map(msg => (
+                       <div key={msg.id} className={`bg-white rounded-[20px] shadow-sm border border-slate-100 overflow-hidden transition-all ${!msg.read ? 'border-l-4 border-l-cyan-500' : ''}`}>
+                         <div className="p-6">
+                           <div className="flex items-start justify-between mb-3">
+                             <div className="flex items-center gap-3">
+                               <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center text-white font-black">
+                                 {msg.name.charAt(0).toUpperCase()}
+                               </div>
+                               <div>
+                                 <p className="font-black text-slate-800">{msg.name}</p>
+                                 <p className="text-slate-400 text-xs">{msg.email} · {msg.phone}</p>
+                               </div>
+                             </div>
+                             <span className="text-slate-400 text-xs">{new Date(msg.createdAt).toLocaleDateString()}</span>
+                           </div>
+                           <p className="text-slate-600 text-sm leading-relaxed mb-3 line-clamp-3">{msg.message}</p>
+                           <div className="flex gap-2">
+                             <a href={`mailto:${msg.email}`}
+                               className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-white hover:bg-cyan-600 transition-colors">
+                               Reply
+                             </a>
+                             <button onClick={() => {
+                               fetch('/api/messages', {
+                                 method: 'PUT',
+                                 headers: { 'Content-Type': 'application/json' },
+                                 body: JSON.stringify({ id: msg.id, read: !msg.read })
+                               })
+                               setMessages(m => m.map(x => x.id === msg.id ? { ...x, read: !x.read } : x))
+                             }}
+                               className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${msg.read ? 'bg-slate-100 text-slate-600' : 'bg-amber-500 text-white'}`}>
+                               {msg.read ? 'Mark Unread' : 'Mark Read'}
+                             </button>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </div>
+             )}
+
+           </div>
         </div>
       </div>
 
