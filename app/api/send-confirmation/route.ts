@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     await resend.emails.send({
-      from: 'AQUA RIDE <bookings@aquaride.tn>',
+      from: 'AQUA RIDE <onboarding@resend.dev>',
       to: email,
       subject: `✅ Booking Confirmed – ${serviceLabel} on ${date}`,
       html: buildEmailHtml({ name, email, serviceLabel, date, time, people, hours, payment, total, discount, id, adminNote }),
