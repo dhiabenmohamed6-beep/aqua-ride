@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation'
 import { getReservations, updateReservation, deleteReservation, type Reservation, type ReservationStatus } from '@/lib/reservations'
 import { getServices, saveServices, generateServiceId, DEFAULT_SERVICES, type Service } from '@/lib/services'
 import { getBanner, saveBanner, DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
+import { type ContactMessage } from '@/lib/contact'
 import ImageCropper from '@/components/ImageCropper'
-import type { ContactMessage } from '@/app/api/messages/route'
 
 const PAYMENT_LABELS: Record<string, string> = { cash:'Cash', transfer:'Bank Transfer', edinar:'E-Dinar' }
 
