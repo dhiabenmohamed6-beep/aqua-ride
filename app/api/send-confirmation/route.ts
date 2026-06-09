@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
 const PAYMENT_LABELS: Record<string, string> = {
   cash:     'Cash',
@@ -174,10 +174,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    })
 
-    await resend.emails.send({
-      from: 'AQUA RIDE <onboarding@resend.dev>',
+    await transporter.sendMail({
+      from: `"AQUA RIDE" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: `✅ Booking Confirmed – ${serviceLabel} on ${date}`,
       html: buildEmailHtml({ name, email, serviceLabel, date, time, people, hours, payment, total, discount, id, adminNote }),

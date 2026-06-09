@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
-
-// Store in memory (resets on cold start - for production use Supabase)
-let banner = { ...DEFAULT_BANNER }
+import { getStoredBanner, saveStoredBanner } from '@/lib/data-store'
 
 export async function GET() {
-  return NextResponse.json(banner)
+  const banner = await getStoredBanner()
+  return NextResponse.json(banner ?? DEFAULT_BANNER)
 }
 
 export async function PUT(req: NextRequest) {
-  banner = await req.json()
+  const banner: BannerSettings = await req.json()
+  await saveStoredBanner(banner)
   return NextResponse.json(banner)
 }
