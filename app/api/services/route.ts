@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DEFAULT_SERVICES, type Service } from '@/lib/services'
-import { getStoredServices, saveStoredServices } from '@/lib/data-store'
+
+let services = [...DEFAULT_SERVICES]
 
 export async function GET() {
-  const services = await getStoredServices()
-  return NextResponse.json(services.length > 0 ? services : DEFAULT_SERVICES)
+  return NextResponse.json(services)
 }
 
 export async function PUT(req: NextRequest) {
-  const services = await req.json()
-  await saveStoredServices(services)
+  services = await req.json()
   return NextResponse.json(services)
 }
