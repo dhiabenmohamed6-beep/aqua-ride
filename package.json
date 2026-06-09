@@ -11,8 +11,8 @@
     "@supabase/supabase-js": "^2.106.1",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.454.0",
-    "next": "15.0.4",
-    "nodemailer": "6.9.14",
+    "next": "16.2.8",
+    "nodemailer": "^8.0.10",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "resend": "4.0.0"
