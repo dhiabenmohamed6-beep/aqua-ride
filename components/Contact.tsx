@@ -7,6 +7,7 @@ export default function Contact() {
     name: '',
     phone: '',
     email: '',
+    subject: '',
     message: '',
   })
   const [loading, setLoading] = useState(false)
@@ -28,7 +29,7 @@ export default function Contact() {
     })
 
     setSent(true)
-    setForm({ name: '', phone: '', email: '', message: '' })
+    setForm({ name: '', phone: '', email: '', subject: '', message: '' })
     setTimeout(() => setSent(false), 5000)
     setLoading(false)
   }
@@ -131,15 +132,25 @@ export default function Contact() {
                       className="bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-xl px-5 py-4 focus:outline-none focus:border-cyan-400 transition-colors"
                     />
                   </div>
-                  <input
+<input
                     name="email"
                     type="email"
                     value={form.email}
                     onChange={handleChange}
-                    placeholder="Email Address"
+                    placeholder="Enter your email (e.g., name@example.com)"
                     required
                     className="bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-xl px-5 py-4 focus:outline-none focus:border-cyan-400 transition-colors"
                   />
+                  
+                  <input
+                    name="subject"
+                    value={form.subject}
+                    onChange={handleChange}
+                    placeholder="Subject (e.g., Booking inquiry, General question)"
+                    required
+                    className="bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-xl px-5 py-4 focus:outline-none focus:border-cyan-400 transition-colors"
+                  />
+                  
                   <textarea
                     name="message"
                     value={form.message}

@@ -151,6 +151,7 @@ export async function getStoredMessages(): Promise<ContactMessage[]> {
       name: m.name,
       phone: m.phone,
       email: m.email,
+      subject: m.subject,
       message: m.message,
       read: m.read,
     }))
@@ -169,6 +170,7 @@ export async function upsertMessage(message: ContactMessage): Promise<void> {
       name: message.name,
       phone: message.phone,
       email: message.email,
+      subject: message.subject,
       message: message.message,
       read: message.read,
     })
