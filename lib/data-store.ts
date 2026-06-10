@@ -204,6 +204,20 @@ export async function upsertMessage(message: ContactMessage): Promise<void> {
   }
 }
 
+export async function deleteStoredMessage(id: string): Promise<void> {
+  const sb = getSupabase()
+  if (!sb) {
+    fallbackMessages = fallbackMessages.filter(m => m.id !== id)
+    return
+  }
+  try {
+    await sb.from('messages').delete().eq('id', id)
+  } catch (e) {
+    console.error('Message delete error:', e)
+    fallbackMessages = fallbackMessages.filter(m => m.id !== id)
+  }
+}
+
 // Banner
 export async function getStoredBanner(): Promise<BannerSettings | null> {
   const sb = getSupabase()

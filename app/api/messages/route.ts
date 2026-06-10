@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { type ContactMessage } from '@/lib/contact'
-import { getStoredMessages, upsertMessage } from '@/lib/data-store'
+import { getStoredMessages, upsertMessage, deleteStoredMessage } from '@/lib/data-store'
 
 export async function GET() {
   const messages = await getStoredMessages()
@@ -25,5 +25,15 @@ export async function PUT(req: NextRequest) {
   const updated: ContactMessage = body
   
   await upsertMessage(updated)
+  return NextResponse.json({ success: true })
+}
+
+export async function DELETE(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+  
+  await deleteStoredMessage(id)
   return NextResponse.json({ success: true })
 }

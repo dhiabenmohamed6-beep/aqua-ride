@@ -996,23 +996,32 @@ export default function AdminDashboard() {
                              <span className="text-slate-400 text-xs">{new Date(msg.createdAt).toLocaleDateString()}</span>
                            </div>
                            <p className="text-slate-600 text-sm leading-relaxed mb-3 line-clamp-3">{msg.message}</p>
-                           <div className="flex gap-2">
-                             <a href={`mailto:${msg.email}`}
-                               className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-white hover:bg-cyan-600 transition-colors">
-                               Reply
-                             </a>
-                             <button onClick={() => {
-                               fetch('/api/messages', {
-                                 method: 'PUT',
-                                 headers: { 'Content-Type': 'application/json' },
-                                 body: JSON.stringify({ id: msg.id, read: !msg.read })
-                               })
-                               setMessages(m => m.map(x => x.id === msg.id ? { ...x, read: !x.read } : x))
-                             }}
-                               className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${msg.read ? 'bg-slate-100 text-slate-600' : 'bg-amber-500 text-white'}`}>
-                               {msg.read ? 'Mark Unread' : 'Mark Read'}
-                             </button>
-                           </div>
+<div className="flex gap-2">
+                              <a href={`mailto:${msg.email}`}
+                                className="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-white hover:bg-cyan-600 transition-colors">
+                                Reply
+                              </a>
+                              <button onClick={() => {
+                                fetch('/api/messages', {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ id: msg.id, read: !msg.read })
+                                })
+                                setMessages(m => m.map(x => x.id === msg.id ? { ...x, read: !x.read } : x))
+                              }}
+                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${msg.read ? 'bg-slate-100 text-slate-600' : 'bg-amber-500 text-white'}`}>
+                                {msg.read ? 'Mark Unread' : 'Mark Read'}
+                              </button>
+                              <button onClick={() => {
+                                if (confirm('Delete this message?')) {
+                                  fetch(`/api/messages?id=${msg.id}`, { method: 'DELETE' })
+                                  setMessages(m => m.filter(x => x.id !== msg.id))
+                                }
+                              }}
+                                className="px-4 py-2 rounded-xl text-xs font-bold bg-red-500 text-white hover:bg-red-600 transition-colors">
+                                Delete
+                              </button>
+                            </div>
                          </div>
                        </div>
                      ))}
