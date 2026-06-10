@@ -23,6 +23,7 @@ function getSupabase() {
 
 // In-memory fallback
 let fallbackMessages: any[] = []
+let fallbackServices: any[] = []
 
 // Reservations
 export async function getStoredReservations(): Promise<Reservation[]> {
@@ -99,7 +100,21 @@ export async function deleteStoredReservation(id: string): Promise<void> {
 // Services
 export async function getStoredServices(): Promise<Service[]> {
   const sb = getSupabase()
-  if (!sb) return []
+  if (!sb) {
+    return fallbackServices.map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      desc: s.desc,
+      price: s.price,
+      basePrice: s.base_price,
+      per: s.per,
+      img: s.img,
+      perPerson: s.per_person,
+      hourly: s.hourly,
+      visible: s.visible,
+      hasFood: s.has_food,
+    }))
+  }
   try {
     const { data, error } = await sb.from('services').select('*')
     if (error || !data) return []
@@ -123,7 +138,10 @@ export async function getStoredServices(): Promise<Service[]> {
 
 export async function saveStoredServices(services: Service[]): Promise<void> {
   const sb = getSupabase()
-  if (!sb) return
+  if (!sb) {
+    fallbackServices = [...services]
+    return
+  }
   for (const service of services) {
     try {
       await sb.from('services').upsert({
@@ -141,6 +159,7 @@ export async function saveStoredServices(services: Service[]): Promise<void> {
       })
     } catch (e) {
       console.error('Service upsert error:', e)
+      fallbackServices = [...services]
     }
   }
 }
@@ -240,9 +259,12 @@ export async function getStoredBanner(): Promise<BannerSettings | null> {
 
 export async function saveStoredBanner(banner: BannerSettings): Promise<void> {
   const sb = getSupabase()
-  if (!sb) return
+  if (!sb) {
+    console.error('Supabase not configured - banner not saved to database')
+    return
+  }
   try {
-    await sb.from('banner').upsert({
+    const { error } = await sb.from('banner').upsert({
       image_url: banner.imageUrl,
       title: banner.title,
       subtitle: banner.subtitle,
@@ -250,7 +272,8 @@ export async function saveStoredBanner(banner: BannerSettings): Promise<void> {
       btn_primary: banner.btnPrimary,
       btn_secondary: banner.btnSecondary,
     })
+    if (error) console.error('Banner upsert error:', error)
   } catch (e) {
-    console.error('Banner upsert error:', e)
+    console.error('Banner save exception:', e)
   }
 }

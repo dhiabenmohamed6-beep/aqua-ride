@@ -355,7 +355,7 @@ function BannerModal({ current, onSave, onClose }: {
 function ServiceModal({ svc, onSave, onClose }: {
   svc: Partial<Service>|null; onSave:(s:Service)=>void; onClose:()=>void
 }) {
-  const blank: Service = { id:'', title:'', desc:'', price:'', basePrice:0, per:'per person', img:'', perPerson:true, hourly:false, visible:true }
+  const blank: Service = { id:'', title:'', desc:'', price:'', basePrice:0, per:'per person', img:'', perPerson:true, hourly:false, visible:true, hasFood:false }
   const [form, setForm] = useState<Service>(svc ? { ...blank, ...svc } : blank)
   const [cropSrc, setCropSrc] = useState<string|null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -438,11 +438,17 @@ function ServiceModal({ svc, onSave, onClose }: {
                 <input type="checkbox" checked={form.hourly} onChange={e=>f('hourly',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
                 Price × hours
               </label>
-              <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                <input type="checkbox" checked={form.visible} onChange={e=>f('visible',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
-                Visible on site
-              </label>
-            </div>
+<label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                 <input type="checkbox" checked={form.visible} onChange={e=>f('visible',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
+                 Visible on site
+               </label>
+               {form.perPerson && (
+                 <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                   <input type="checkbox" checked={form.hasFood} onChange={e=>f('hasFood',e.target.checked)} className="accent-cyan-500 w-4 h-4" />
+                   Includes meal option
+                 </label>
+               )}
+             </div>
             <button onClick={handleSave}
               className="w-full py-3 rounded-xl font-black text-white text-sm transition-all hover:opacity-90"
               style={{ background:'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
