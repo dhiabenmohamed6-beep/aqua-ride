@@ -9,7 +9,7 @@ export default function Services() {
   useEffect(() => {
     async function loadServices() {
       try {
-        const res = await fetch('/api/services')
+        const res = await fetch('/api/services?cache=' + Date.now())
         const data = await res.json()
         setServices(data.filter((s: Service) => s.visible))
       } catch {
@@ -17,6 +17,10 @@ export default function Services() {
       }
     }
     loadServices()
+    
+    // Refresh every 30 seconds for live updates
+    const interval = setInterval(loadServices, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   return (

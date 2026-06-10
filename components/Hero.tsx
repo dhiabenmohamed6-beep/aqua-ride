@@ -9,7 +9,7 @@ export default function Hero() {
   useEffect(() => {
     async function loadBanner() {
       try {
-        const res = await fetch('/api/banner')
+        const res = await fetch('/api/banner?cache=' + Date.now())
         const data = await res.json()
         setBanner(data)
       } catch {
@@ -17,6 +17,10 @@ export default function Hero() {
       }
     }
     loadBanner()
+    
+    // Refresh every 30 seconds for live updates
+    const interval = setInterval(loadBanner, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   return (

@@ -27,7 +27,7 @@ function BookingForm() {
   useEffect(() => {
     async function loadServices() {
       try {
-        const res = await fetch('/api/services')
+        const res = await fetch('/api/services?cache=' + Date.now())
         const data = await res.json()
         setServices(data.filter((s: Service) => s.visible))
       } catch {
@@ -35,10 +35,14 @@ function BookingForm() {
       }
     }
     loadServices()
+    
+    // Refresh every 30 seconds for live updates
+    const interval = setInterval(loadServices, 30000)
     const serviceParam = searchParams.get('service')
     if (serviceParam) {
       setForm(f => ({ ...f, service: serviceParam }))
     }
+    return () => clearInterval(interval)
   }, [searchParams])
 
   const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00']
