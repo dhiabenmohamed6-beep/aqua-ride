@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateId, type Reservation } from '@/lib/reservations'
-
-// In-memory storage (resets on Vercel cold start)
-let reservations: Reservation[] = []
+import { getStoredReservations, upsertReservation, deleteStoredReservation } from '@/lib/data-store'
 
 export async function GET() {
-  const sorted = [...reservations].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  return NextResponse.json(sorted)
+  const reservations = await getStoredReservations()
+  return NextResponse.json(reservations)
 }
 
 export async function POST(req: NextRequest) {
@@ -17,15 +15,15 @@ export async function POST(req: NextRequest) {
     ...body
   }
   
-  reservations.unshift(reservation)
+  await upsertReservation(reservation)
   return NextResponse.json(reservation)
 }
 
 export async function PUT(req: NextRequest) {
   const body = await req.json()
-  const { id, ...updates } = body
-  reservations = reservations.map(r => r.id === id ? { ...r, ...updates } : r)
-  const updated = reservations.find(r => r.id === id)
+  const updated: Reservation = body
+  
+  await upsertReservation(updated)
   return NextResponse.json(updated)
 }
 
@@ -35,6 +33,6 @@ export async function DELETE(req: NextRequest) {
   
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
   
-  reservations = reservations.filter(r => r.id !== id)
+  await deleteStoredReservation(id)
   return NextResponse.json({ success: true })
 }

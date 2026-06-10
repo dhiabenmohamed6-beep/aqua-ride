@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
-
-let banner = { ...DEFAULT_BANNER }
+import { getStoredBanner, saveStoredBanner } from '@/lib/data-store'
 
 export async function GET() {
-  return NextResponse.json(banner)
+  try {
+    const banner = await getStoredBanner()
+    return NextResponse.json(banner ?? DEFAULT_BANNER)
+  } catch {
+    return NextResponse.json(DEFAULT_BANNER)
+  }
 }
 
 export async function PUT(req: NextRequest) {
-  banner = await req.json()
-  return NextResponse.json(banner)
+  try {
+    const banner: BannerSettings = await req.json()
+    await saveStoredBanner(banner)
+    return NextResponse.json(banner)
+  } catch {
+    return NextResponse.json(DEFAULT_BANNER, { status: 500 })
+  }
 }

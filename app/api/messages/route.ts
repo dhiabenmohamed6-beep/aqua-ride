@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { type ContactMessage } from '@/lib/contact'
-
-let messages: ContactMessage[] = []
+import { getStoredMessages, upsertMessage } from '@/lib/data-store'
 
 export async function GET() {
-  const sorted = [...messages].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  return NextResponse.json(sorted)
+  const messages = await getStoredMessages()
+  return NextResponse.json(messages)
 }
 
 export async function POST(req: NextRequest) {
@@ -17,13 +16,14 @@ export async function POST(req: NextRequest) {
     ...body,
   }
 
-  messages.unshift(msg)
+  await upsertMessage(msg)
   return NextResponse.json(msg)
 }
 
 export async function PUT(req: NextRequest) {
   const body = await req.json()
-  const { id, ...updates } = body
-  messages = messages.map(m => m.id === id ? { ...m, ...updates } : m)
+  const updated: ContactMessage = body
+  
+  await upsertMessage(updated)
   return NextResponse.json({ success: true })
 }
