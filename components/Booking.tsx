@@ -29,9 +29,20 @@ function BookingForm() {
       try {
         const res = await fetch('/api/services?cache=' + Date.now())
         const data = await res.json()
-        setServices(data.filter((s: Service) => s.visible))
+        const visible = data.filter((s: Service) => s.visible)
+        // Prioritize "pack" and "excursion" services
+        const prioritized = [
+          ...visible.filter((s: Service) => s.id === 'pack' || s.id === 'excursion'),
+          ...visible.filter((s: Service) => s.id !== 'pack' && s.id !== 'excursion'),
+        ]
+        setServices(prioritized)
       } catch {
-        setServices(DEFAULT_SERVICES.filter(s => s.visible))
+        const visible = DEFAULT_SERVICES.filter(s => s.visible)
+        const prioritized = [
+          ...visible.filter((s: Service) => s.id === 'pack' || s.id === 'excursion'),
+          ...visible.filter((s: Service) => s.id !== 'pack' && s.id !== 'excursion'),
+        ]
+        setServices(prioritized)
       }
     }
     loadServices()

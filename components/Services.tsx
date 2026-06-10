@@ -11,9 +11,20 @@ export default function Services() {
       try {
         const res = await fetch('/api/services?cache=' + Date.now())
         const data = await res.json()
-        setServices(data.filter((s: Service) => s.visible))
+        const visible = data.filter((s: Service) => s.visible)
+        // Prioritize "pack" and "excursion" (privée) services
+        const prioritized = [
+          ...visible.filter((s: Service) => s.id === 'pack' || s.id === 'excursion'),
+          ...visible.filter((s: Service) => s.id !== 'pack' && s.id !== 'excursion'),
+        ]
+        setServices(prioritized)
       } catch {
-        setServices(DEFAULT_SERVICES.filter(s => s.visible))
+        const visible = DEFAULT_SERVICES.filter(s => s.visible)
+        const prioritized = [
+          ...visible.filter((s: Service) => s.id === 'pack' || s.id === 'excursion'),
+          ...visible.filter((s: Service) => s.id !== 'pack' && s.id !== 'excursion'),
+        ]
+        setServices(prioritized)
       }
     }
     loadServices()
@@ -43,10 +54,15 @@ export default function Services() {
           {services.map((svc, i) => (
             <div key={svc.id || i}
               className="group bg-white rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 sm:hover:-translate-y-2 flex flex-col h-full">
-              <div className="relative h-44 sm:h-56 overflow-hidden">
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage:`url('${svc.img}')` }} />
-                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 transition-all duration-500" />
+<div className="relative h-44 sm:h-56 overflow-hidden">
+                 {svc.id === 'pack' || svc.id === 'excursion' ? (
+                   <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full z-10">
+                     Most Popular
+                   </div>
+                 ) : null}
+                 <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                   style={{ backgroundImage:`url('${svc.img}')` }} />
+                 <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/20 transition-all duration-500" />
                 <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl px-2 sm:px-4 py-1 sm:py-2 text-center">
                   <p className="text-lg sm:text-xl font-black text-cyan-500 leading-none">{svc.price}</p>
                   <p className="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">{svc.per}</p>
