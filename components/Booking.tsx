@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { getServices, type Service } from '@/lib/services'
 import { generateId } from '@/lib/reservations'
+import { useSearchParams } from 'next/navigation'
 
-export default function Booking() {
+function BookingForm() {
   const [services, setServices] = useState<Service[]>([])
   const [form, setForm] = useState({
     name: '',
@@ -21,10 +22,15 @@ export default function Booking() {
   })
   const [showSuccess, setShowSuccess] = useState(false)
   const [submittedPrice, setSubmittedPrice] = useState(0)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     setServices(getServices().filter(s => s.visible))
-  }, [])
+    const serviceParam = searchParams.get('service')
+    if (serviceParam) {
+      setForm(f => ({ ...f, service: serviceParam }))
+    }
+  }, [searchParams])
 
   const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00']
 
@@ -93,127 +99,169 @@ export default function Booking() {
 
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="relative bg-white/10 backdrop-blur-xl rounded-[32px] p-8 sm:p-12 border border-white/20 shadow-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-              <div className="md:col-span-2">
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Full Name"
-                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                  required
-                />
+            <div className="mb-6">
+              <h3 className="text-white font-bold text-lg mb-4">Personal Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="md:col-span-2">
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Full Name *</label>
+                  <input
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Enter your full name (e.g., Mohamed Ahmed)"
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Phone Number *</label>
+                  <input
+                    name="phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="Enter your phone (e.g., +216 12 345 678)"
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Email Address *</label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email (e.g., name@example.com)"
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    required
+                  />
+                </div>
               </div>
-              
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="Phone Number"
-                className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                required
-              />
-              
-              <input
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Email Address"
-                className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                required
-              />
-
-              <select
-                name="service"
-                value={form.service}
-                onChange={handleChange}
-                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                required
-              >
-                <option value="" className="bg-[#062B37]">Select Service</option>
-                {services.map(s => (
-                  <option key={s.id} value={s.id} className="bg-[#062B37]">{s.title} - {s.price}</option>
-                ))}
-              </select>
-
-              <input
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                required
-              />
-
-              <select
-                name="time"
-                value={form.time}
-                onChange={handleChange}
-                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                required
-              >
-                <option value="" className="bg-[#062B37]">Select Time</option>
-                {timeSlots.map(t => (
-                  <option key={t} value={t} className="bg-[#062B37]">{t}</option>
-                ))}
-              </select>
-
-              <input
-                name="people"
-                type="number"
-                min={1}
-                value={form.people}
-                onChange={handleChange}
-                placeholder="Number of People"
-                className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-              />
-
-              {selectedService?.hourly && (
-                <input
-                  name="hours"
-                  type="number"
-                  min={1}
-                  value={form.hours}
-                  onChange={handleChange}
-                  placeholder="Number of Hours"
-                  className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                />
-              )}
-
-              {selectedService?.hasFood && (
-                <select
-                  name="food"
-                  value={form.food}
-                  onChange={handleChange}
-                  className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-                >
-                  <option value="" className="bg-[#062B37]">Select Food Type</option>
-                  <option value="escalope" className="bg-[#062B37]">Escalope</option>
-                  <option value="dorade" className="bg-[#062B37]">Dorade (Sea Bream)</option>
-                </select>
-              )}
-
-              <select
-                name="payment"
-                value={form.payment}
-                onChange={handleChange}
-                className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
-              >
-                <option value="cash" className="bg-[#062B37]">Cash</option>
-                <option value="transfer" className="bg-[#062B37]">Bank Transfer</option>
-                <option value="edinar" className="bg-[#062B37]">E-Dinar</option>
-              </select>
             </div>
 
-            <textarea
-              name="message"
-              value={form.message}
-              onChange={handleChange}
-              placeholder="Special requests..."
-              rows={3}
-              className="w-full h-32 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-400 resize-none mb-6 text-base"
-            />
+            <div className="mb-6">
+              <h3 className="text-white font-bold text-lg mb-4">Booking Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Select Service *</label>
+                  <select
+                    name="service"
+                    value={form.service}
+                    onChange={handleChange}
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    required
+                  >
+                    <option value="" className="bg-[#062B37]">Choose a service...</option>
+                    {services.map(s => (
+                      <option key={s.id} value={s.id} className="bg-[#062B37]">{s.title} - {s.price}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Date *</label>
+                  <input
+                    name="date"
+                    type="date"
+                    value={form.date}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Time Slot *</label>
+                  <select
+                    name="time"
+                    value={form.time}
+                    onChange={handleChange}
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    required
+                  >
+                    <option value="" className="bg-[#062B37]">Select time (e.g., 10:00)</option>
+                    {timeSlots.map(t => (
+                      <option key={t} value={t} className="bg-[#062B37]">{t}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">
+                    {selectedService?.perPerson ? 'Number of People *' : selectedService?.hourly ? 'Number of Hours *' : 'Quantity'}
+                  </label>
+                  {selectedService?.perPerson && (
+                    <input
+                      name="people"
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={form.people}
+                      onChange={handleChange}
+                      placeholder="How many people? (1-20)"
+                      className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    />
+                  )}
+                  {selectedService?.hourly && !selectedService.perPerson && (
+                    <input
+                      name="hours"
+                      type="number"
+                      min={1}
+                      max={8}
+                      value={form.hours}
+                      onChange={handleChange}
+                      placeholder="Duration in hours (1-8)"
+                      className="w-full h-14 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    />
+                  )}
+                </div>
+
+                {selectedService?.hasFood && (
+                  <div className="md:col-span-2">
+                    <label className="text-cyan-300 text-xs font-semibold mb-2 block">Food Preference</label>
+                    <select
+                      name="food"
+                      value={form.food}
+                      onChange={handleChange}
+                      className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                    >
+                      <option value="" className="bg-[#062B37]">Select your meal</option>
+                      <option value="escalope" className="bg-[#062B37]">Escalope (Chicken Cutlet)</option>
+                      <option value="dorade" className="bg-[#062B37]">Dorade (Sea Bream) - Fresh catch</option>
+                    </select>
+                  </div>
+                )}
+
+                <div className="md:col-span-2">
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Payment Method *</label>
+                  <select
+                    name="payment"
+                    value={form.payment}
+                    onChange={handleChange}
+                    className="w-full h-14 bg-white/10 border border-white/20 text-white rounded-2xl px-6 focus:outline-none focus:border-cyan-400 text-base font-medium"
+                  >
+                    <option value="cash" className="bg-[#062B37]">Cash - Pay on arrival</option>
+                    <option value="transfer" className="bg-[#062B37]">Bank Transfer - Send to our account</option>
+                    <option value="edinar" className="bg-[#062B37]">E-Dinar - Digital payment</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="text-cyan-300 text-xs font-semibold mb-2 block">Special Requests</label>
+                  <textarea
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    placeholder="Any special requirements? (e.g., anniversary celebration, birthday surprise, specific needs)"
+                    rows={3}
+                    className="w-full h-32 bg-white/10 border border-white/20 text-white placeholder-white/50 rounded-2xl px-6 py-4 focus:outline-none focus:border-cyan-400 resize-none text-base"
+                  />
+                </div>
+              </div>
+            </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 p-6 bg-cyan-500/20 rounded-2xl border border-cyan-400/30">
               <div>
@@ -271,5 +319,13 @@ export default function Booking() {
         .animate-bounce-in { animation: bounce-in 0.5s ease-out; }
       `}</style>
     </section>
+  )
+}
+
+export default function Booking() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen bg-[#062B37] text-white">Loading...</div>}>
+      <BookingForm />
+    </Suspense>
   )
 }

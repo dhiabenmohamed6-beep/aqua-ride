@@ -21,7 +21,12 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   const body = await req.json()
-  const updated: Reservation = body
+  const updated: Reservation = {
+    ...body,
+    serviceLabel: body.service_label ?? body.serviceLabel,
+    adminNote: body.admin_note ?? body.adminNote,
+    createdAt: body.created_at ?? body.createdAt,
+  }
   
   await upsertReservation(updated)
   return NextResponse.json(updated)
