@@ -10,12 +10,19 @@ function getSupabase() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (url && key) {
-      const { createClient } = require('@supabase/supabase-js')
-      supabase = createClient(url, key)
+      try {
+        const { createClient } = require('@supabase/supabase-js')
+        supabase = createClient(url, key)
+      } catch (e) {
+        console.error('Failed to create Supabase client:', e)
+      }
     }
   }
   return supabase
 }
+
+// In-memory fallback
+let fallbackMessages: any[] = []
 
 // Reservations
 export async function getStoredReservations(): Promise<Reservation[]> {
@@ -141,10 +148,24 @@ export async function saveStoredServices(services: Service[]): Promise<void> {
 // Messages
 export async function getStoredMessages(): Promise<ContactMessage[]> {
   const sb = getSupabase()
-  if (!sb) return []
+  if (!sb) {
+    return fallbackMessages.map((m: any) => ({
+      id: m.id,
+      createdAt: m.createdAt,
+      name: m.name,
+      phone: m.phone,
+      email: m.email,
+      subject: m.subject,
+      message: m.message,
+      read: m.read,
+    }))
+  }
   try {
     const { data, error } = await sb.from('messages').select('*').order('created_at', { ascending: false })
-    if (error) return []
+    if (error) {
+      console.error('Messages fetch error:', error)
+      return []
+    }
     return (data || []).map((m: any) => ({
       id: m.id,
       createdAt: m.created_at,
@@ -162,7 +183,10 @@ export async function getStoredMessages(): Promise<ContactMessage[]> {
 
 export async function upsertMessage(message: ContactMessage): Promise<void> {
   const sb = getSupabase()
-  if (!sb) return
+  if (!sb) {
+    fallbackMessages.unshift(message)
+    return
+  }
   try {
     await sb.from('messages').upsert({
       id: message.id,
@@ -176,6 +200,7 @@ export async function upsertMessage(message: ContactMessage): Promise<void> {
     })
   } catch (e) {
     console.error('Message upsert error:', e)
+    fallbackMessages.unshift(message)
   }
 }
 
