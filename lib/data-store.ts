@@ -6,12 +6,13 @@ import { type ContactMessage } from '@/lib/contact'
 let supabase: any = null
 
 function getSupabase() {
-  if (!supabase && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    const { createClient } = require('@supabase/supabase-js')
-    supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    )
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (url && key) {
+      const { createClient } = require('@supabase/supabase-js')
+      supabase = createClient(url, key)
+    }
   }
   return supabase
 }
@@ -31,10 +32,16 @@ export async function getStoredReservations(): Promise<Reservation[]> {
 
 export async function upsertReservation(reservation: Reservation): Promise<void> {
   const sb = getSupabase()
-  if (!sb) return
+  if (!sb) {
+    console.error('Supabase not configured')
+    return
+  }
   try {
-    await sb.from('reservations').upsert(reservation)
-  } catch {}
+    const { error } = await sb.from('reservations').upsert(reservation)
+    if (error) console.error('Upsert error:', error)
+  } catch (e) {
+    console.error('Upsert exception:', e)
+  }
 }
 
 export async function deleteStoredReservation(id: string): Promise<void> {
