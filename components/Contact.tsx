@@ -22,15 +22,24 @@ export default function Contact() {
     e.preventDefault()
     setLoading(true)
 
-    await fetch('/api/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-
-    setSent(true)
-    setForm({ name: '', phone: '', email: '', subject: '', message: '' })
-    setTimeout(() => setSent(false), 5000)
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to send')
+      }
+      
+      setSent(true)
+      setForm({ name: '', phone: '', email: '', subject: '', message: '' })
+      setTimeout(() => setSent(false), 5000)
+    } catch (error) {
+      alert('Could not send message. Please try again.')
+    }
+    
     setLoading(false)
   }
 
