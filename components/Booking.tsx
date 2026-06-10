@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { getServices, type Service } from '@/lib/services'
+import { DEFAULT_SERVICES, type Service } from '@/lib/services'
 import { generateId } from '@/lib/reservations'
 import { useSearchParams } from 'next/navigation'
 
@@ -25,7 +25,16 @@ function BookingForm() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    setServices(getServices().filter(s => s.visible))
+    async function loadServices() {
+      try {
+        const res = await fetch('/api/services')
+        const data = await res.json()
+        setServices(data.filter((s: Service) => s.visible))
+      } catch {
+        setServices(DEFAULT_SERVICES.filter(s => s.visible))
+      }
+    }
+    loadServices()
     const serviceParam = searchParams.get('service')
     if (serviceParam) {
       setForm(f => ({ ...f, service: serviceParam }))

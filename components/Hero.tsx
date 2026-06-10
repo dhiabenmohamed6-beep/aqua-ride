@@ -1,13 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getBanner, DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
+import { DEFAULT_BANNER, type BannerSettings } from '@/lib/banner'
 
 export default function Hero() {
   const [banner, setBanner] = useState<BannerSettings>(DEFAULT_BANNER)
 
   useEffect(() => {
-    setBanner(getBanner())
+    async function loadBanner() {
+      try {
+        const res = await fetch('/api/banner')
+        const data = await res.json()
+        setBanner(data)
+      } catch {
+        setBanner(DEFAULT_BANNER)
+      }
+    }
+    loadBanner()
   }, [])
 
   return (

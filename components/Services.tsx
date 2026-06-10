@@ -1,13 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getServices, DEFAULT_SERVICES, type Service } from '@/lib/services'
+import { DEFAULT_SERVICES, type Service } from '@/lib/services'
 
 export default function Services() {
-  const [services, setServices] = useState<Service[]>(DEFAULT_SERVICES.filter(s => s.visible))
+  const [services, setServices] = useState<Service[]>([])
 
   useEffect(() => {
-    setServices(getServices().filter(s => s.visible))
+    async function loadServices() {
+      try {
+        const res = await fetch('/api/services')
+        const data = await res.json()
+        setServices(data.filter((s: Service) => s.visible))
+      } catch {
+        setServices(DEFAULT_SERVICES.filter(s => s.visible))
+      }
+    }
+    loadServices()
   }, [])
 
   return (
