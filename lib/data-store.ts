@@ -24,7 +24,25 @@ export async function getStoredReservations(): Promise<Reservation[]> {
   try {
     const { data, error } = await sb.from('reservations').select('*').order('created_at', { ascending: false })
     if (error) return []
-    return data || []
+    return (data || []).map((r: any) => ({
+      id: r.id,
+      createdAt: r.created_at,
+      name: r.name,
+      phone: r.phone,
+      email: r.email,
+      service: r.service,
+      serviceLabel: r.service_label,
+      date: r.date,
+      time: r.time,
+      people: r.people,
+      hours: r.hours,
+      message: r.message,
+      payment: r.payment,
+      total: r.total,
+      status: r.status,
+      adminNote: r.admin_note,
+      discount: r.discount,
+    }))
   } catch {
     return []
   }
@@ -37,7 +55,26 @@ export async function upsertReservation(reservation: Reservation): Promise<void>
     return
   }
   try {
-    const { error } = await sb.from('reservations').upsert(reservation)
+    const dbReservation = {
+      id: reservation.id,
+      created_at: reservation.createdAt,
+      name: reservation.name,
+      phone: reservation.phone,
+      email: reservation.email,
+      service: reservation.service,
+      service_label: reservation.serviceLabel,
+      date: reservation.date,
+      time: reservation.time,
+      people: reservation.people,
+      hours: reservation.hours,
+      message: reservation.message,
+      payment: reservation.payment,
+      total: reservation.total,
+      status: reservation.status,
+      admin_note: reservation.adminNote,
+      discount: reservation.discount,
+    }
+    const { error } = await sb.from('reservations').upsert(dbReservation)
     if (error) console.error('Upsert error:', error)
   } catch (e) {
     console.error('Upsert exception:', e)
@@ -59,7 +96,19 @@ export async function getStoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await sb.from('services').select('*')
     if (error || !data) return []
-    return data
+    return data.map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      desc: s.desc,
+      price: s.price,
+      basePrice: s.base_price,
+      per: s.per,
+      img: s.img,
+      perPerson: s.per_person,
+      hourly: s.hourly,
+      visible: s.visible,
+      hasFood: s.has_food,
+    }))
   } catch {
     return []
   }
@@ -70,8 +119,22 @@ export async function saveStoredServices(services: Service[]): Promise<void> {
   if (!sb) return
   for (const service of services) {
     try {
-      await sb.from('services').upsert(service)
-    } catch {}
+      await sb.from('services').upsert({
+        id: service.id,
+        title: service.title,
+        desc: service.desc,
+        price: service.price,
+        base_price: service.basePrice,
+        per: service.per,
+        img: service.img,
+        per_person: service.perPerson,
+        hourly: service.hourly,
+        visible: service.visible,
+        has_food: service.hasFood,
+      })
+    } catch (e) {
+      console.error('Service upsert error:', e)
+    }
   }
 }
 
@@ -82,7 +145,15 @@ export async function getStoredMessages(): Promise<ContactMessage[]> {
   try {
     const { data, error } = await sb.from('messages').select('*').order('created_at', { ascending: false })
     if (error) return []
-    return data || []
+    return (data || []).map((m: any) => ({
+      id: m.id,
+      createdAt: m.created_at,
+      name: m.name,
+      phone: m.phone,
+      email: m.email,
+      message: m.message,
+      read: m.read,
+    }))
   } catch {
     return []
   }
@@ -92,8 +163,18 @@ export async function upsertMessage(message: ContactMessage): Promise<void> {
   const sb = getSupabase()
   if (!sb) return
   try {
-    await sb.from('messages').upsert(message)
-  } catch {}
+    await sb.from('messages').upsert({
+      id: message.id,
+      created_at: message.createdAt,
+      name: message.name,
+      phone: message.phone,
+      email: message.email,
+      message: message.message,
+      read: message.read,
+    })
+  } catch (e) {
+    console.error('Message upsert error:', e)
+  }
 }
 
 // Banner
@@ -103,7 +184,14 @@ export async function getStoredBanner(): Promise<BannerSettings | null> {
   try {
     const { data, error } = await sb.from('banner').select('*').single()
     if (error || !data) return null
-    return data
+    return {
+      imageUrl: data.image_url,
+      title: data.title,
+      subtitle: data.subtitle,
+      description: data.description,
+      btnPrimary: data.btn_primary,
+      btnSecondary: data.btn_secondary,
+    }
   } catch {
     return null
   }
@@ -113,6 +201,15 @@ export async function saveStoredBanner(banner: BannerSettings): Promise<void> {
   const sb = getSupabase()
   if (!sb) return
   try {
-    await sb.from('banner').upsert(banner)
-  } catch {}
+    await sb.from('banner').upsert({
+      image_url: banner.imageUrl,
+      title: banner.title,
+      subtitle: banner.subtitle,
+      description: banner.description,
+      btn_primary: banner.btnPrimary,
+      btn_secondary: banner.btnSecondary,
+    })
+  } catch (e) {
+    console.error('Banner upsert error:', e)
+  }
 }
