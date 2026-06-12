@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import SeaWeatherBar from '@/components/SeaWeatherBar'
 
 const links = [
   { label: 'Home',     href: '#home'     },
@@ -45,6 +46,7 @@ export default function Navbar() {
             : 'bg-white/80 backdrop-blur-md border-b border-slate-200/50'
           }`}
       >
+        <SeaWeatherBar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
 
           {/* Logo */}
