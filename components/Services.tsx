@@ -12,17 +12,16 @@ export default function Services() {
         const res = await fetch('/api/services?cache=' + Date.now())
         const data = await res.json()
         const visible = data.filter((s: Service) => s.visible)
-        // Prioritize "pack" and "excursion" (privée) services
         const prioritized = [
-          ...visible.filter((s: Service) => s.id === 'pack' || s.id === 'excursion'),
-          ...visible.filter((s: Service) => s.id !== 'pack' && s.id !== 'excursion'),
+          ...visible.filter((s: Service) => s.id === 'balade' || s.id === 'pack' || s.id === 'excursion'),
+          ...visible.filter((s: Service) => s.id !== 'balade' && s.id !== 'pack' && s.id !== 'excursion'),
         ]
         setServices(prioritized)
       } catch {
         const visible = DEFAULT_SERVICES.filter(s => s.visible)
         const prioritized = [
-          ...visible.filter((s: Service) => s.id === 'pack' || s.id === 'excursion'),
-          ...visible.filter((s: Service) => s.id !== 'pack' && s.id !== 'excursion'),
+          ...visible.filter((s: Service) => s.id === 'balade' || s.id === 'pack' || s.id === 'excursion'),
+          ...visible.filter((s: Service) => s.id !== 'balade' && s.id !== 'pack' && s.id !== 'excursion'),
         ]
         setServices(prioritized)
       }
@@ -55,7 +54,7 @@ export default function Services() {
             <div key={svc.id || i}
               className="group bg-white rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 sm:hover:-translate-y-2 flex flex-col h-full">
 <div className="relative h-44 sm:h-56 overflow-hidden">
-                 {svc.id === 'pack' || svc.id === 'excursion' ? (
+                  {svc.id === 'balade' || svc.id === 'pack' || svc.id === 'excursion' ? (
                    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] sm:text-xs font-bold px-2 sm:px-3 py-1 rounded-full z-10">
                      Most Popular
                    </div>
