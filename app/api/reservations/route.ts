@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateId, type Reservation } from '@/lib/reservations'
 import { getStoredReservations, upsertReservation, deleteStoredReservation } from '@/lib/data-store'
-import { sendOwnerNotification, sendCustomerConfirmation } from '@/lib/mail'
+import { sendOwnerNotification, sendCustomerConfirmation, sendOwnerConfirmationCopy } from '@/lib/mail'
 
 export async function GET() {
   const reservations = await getStoredReservations()
@@ -47,6 +47,7 @@ export async function PUT(req: NextRequest) {
   if (updated.status === 'confirmed' && !wasConfirmed) {
     try {
       await sendCustomerConfirmation(updated)
+      await sendOwnerConfirmationCopy(updated)
       emailSent = true
     } catch (err: unknown) {
       emailError = err instanceof Error ? err.message : String(err)
