@@ -37,14 +37,11 @@ export async function PUT(req: NextRequest) {
     createdAt: body.created_at ?? body.createdAt,
   }
 
-  const previous = (await getStoredReservations()).find(r => r.id === updated.id)
-  const wasConfirmed = previous?.status === 'confirmed'
-
   await upsertReservation(updated)
 
   let emailSent = false
   let emailError = ''
-  if (updated.status === 'confirmed' && !wasConfirmed) {
+  if (updated.status === 'confirmed') {
     try {
       await sendCustomerConfirmation(updated)
       await sendOwnerConfirmationCopy(updated)

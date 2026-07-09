@@ -91,7 +91,7 @@ function Drawer({ res, onClose, onUpdate, onDelete }: {
 
   async function save(patch: Partial<Reservation>) {
     const updated = { ...res, ...patch }
-    const sendingConfirmation = patch.status === 'confirmed' && res.status !== 'confirmed'
+    const sendingConfirmation = patch.status === 'confirmed'
     if (sendingConfirmation) { setEmailSending(true); setEmailStatus('idle') }
     try {
       const result = await onUpdate(updated)
