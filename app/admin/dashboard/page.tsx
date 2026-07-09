@@ -79,7 +79,7 @@ function DonutChart({ segments }: { segments: { value:number; color:string; labe
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
 function Drawer({ res, onClose, onUpdate, onDelete }: {
-  res: Reservation; onClose: ()=>void; onUpdate:(r:Reservation)=>void; onDelete:(id:string)=>void
+  res: Reservation; onClose: ()=>void; onUpdate:(r:Reservation)=>Promise<{ emailSent?: boolean; emailError?: string }>; onDelete:(id:string)=>void
 }) {
   const [note, setNote]         = useState(res.adminNote)
   const [discount, setDiscount] = useState(res.discount)
@@ -91,20 +91,19 @@ function Drawer({ res, onClose, onUpdate, onDelete }: {
 
   async function save(patch: Partial<Reservation>) {
     const updated = { ...res, ...patch }
-    onUpdate(updated)
-    if (patch.status === 'confirmed' && res.status !== 'confirmed') {
-      setEmailSending(true); setEmailStatus('idle')
-      try {
-        const resp = await fetch('/api/send-confirmation', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ name:updated.name, email:updated.email, serviceLabel:updated.serviceLabel,
-            date:updated.date, time:updated.time, people:updated.people, hours:updated.hours,
-            payment:updated.payment, total:updated.total, discount:updated.discount, id:updated.id, adminNote:updated.adminNote }),
-        })
-        if (resp.ok) setEmailStatus('sent')
-        else { const j=await resp.json().catch(()=>({})); setEmailError(j.error??`HTTP ${resp.status}`); setEmailStatus('error') }
-      } catch(err) { setEmailError(err instanceof Error?err.message:'Network error'); setEmailStatus('error') }
-      finally { setEmailSending(false) }
+    const sendingConfirmation = patch.status === 'confirmed' && res.status !== 'confirmed'
+    if (sendingConfirmation) { setEmailSending(true); setEmailStatus('idle') }
+    try {
+      const result = await onUpdate(updated)
+      if (sendingConfirmation) {
+        if (result?.emailSent) setEmailStatus('sent')
+        else if (result?.emailError) { setEmailError(result.emailError); setEmailStatus('error') }
+        else setEmailStatus('idle')
+      }
+    } catch (err) {
+      if (sendingConfirmation) { setEmailError(err instanceof Error ? err.message : 'Network error'); setEmailStatus('error') }
+    } finally {
+      if (sendingConfirmation) setEmailSending(false)
     }
   }
 
@@ -517,14 +516,16 @@ export default function AdminDashboard() {
     setServices(await res.json())
   }
 
-  async function handleUpdate(u: Reservation) {
-    await fetch('/api/reservations', {
+  async function handleUpdate(u: Reservation): Promise<{ emailSent?: boolean; emailError?: string }> {
+    const res = await fetch('/api/reservations', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(u)
     })
+    const data = await res.json().catch(() => ({}))
     await refreshReservations()
     setSelected(u)
+    return data
   }
   
   async function handleDelete(id: string) {

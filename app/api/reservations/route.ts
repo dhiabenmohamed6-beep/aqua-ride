@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateId, type Reservation } from '@/lib/reservations'
 import { getStoredReservations, upsertReservation, deleteStoredReservation } from '@/lib/data-store'
-import { sendOwnerNotification } from '@/lib/mail'
+import { sendOwnerNotification, sendCustomerConfirmation } from '@/lib/mail'
 
 export async function GET() {
   const reservations = await getStoredReservations()
@@ -36,9 +36,25 @@ export async function PUT(req: NextRequest) {
     adminNote: body.admin_note ?? body.adminNote,
     createdAt: body.created_at ?? body.createdAt,
   }
-  
+
+  const previous = (await getStoredReservations()).find(r => r.id === updated.id)
+  const wasConfirmed = previous?.status === 'confirmed'
+
   await upsertReservation(updated)
-  return NextResponse.json(updated)
+
+  let emailSent = false
+  let emailError = ''
+  if (updated.status === 'confirmed' && !wasConfirmed) {
+    try {
+      await sendCustomerConfirmation(updated)
+      emailSent = true
+    } catch (err: unknown) {
+      emailError = err instanceof Error ? err.message : String(err)
+      console.error('Confirmation email failed:', emailError)
+    }
+  }
+
+  return NextResponse.json({ ...updated, emailSent, emailError })
 }
 
 export async function DELETE(req: NextRequest) {
