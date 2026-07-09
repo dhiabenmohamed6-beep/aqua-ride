@@ -107,6 +107,26 @@ function Drawer({ res, onClose, onUpdate, onDelete }: {
     }
   }
 
+  async function resendConfirmation() {
+    setEmailSending(true); setEmailStatus('idle')
+    try {
+      const resp = await fetch('/api/send-confirmation', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: res.name, email: res.email, serviceLabel: res.serviceLabel,
+          date: res.date, time: res.time, people: res.people, hours: res.hours,
+          payment: res.payment, total: res.total, discount: res.discount, id: res.id, adminNote: res.adminNote,
+        }),
+      })
+      if (resp.ok) setEmailStatus('sent')
+      else { const j = await resp.json().catch(() => ({})); setEmailError(j.error ?? `HTTP ${resp.status}`); setEmailStatus('error') }
+    } catch (err) {
+      setEmailError(err instanceof Error ? err.message : 'Network error'); setEmailStatus('error')
+    } finally {
+      setEmailSending(false)
+    }
+  }
+
   const sm = STATUS_META[res.status]
 
   return (
@@ -147,6 +167,13 @@ function Drawer({ res, onClose, onUpdate, onDelete }: {
             {emailSending && <div className="mt-3 text-xs text-cyan-600 bg-cyan-50 border border-cyan-200 rounded-xl px-4 py-3 flex items-center gap-2"><span className="animate-spin">⏳</span>Sending email to {res.email}…</div>}
             {emailStatus==='sent' && <div className="mt-3 text-xs text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">✅ Email sent to <strong>{res.email}</strong></div>}
             {emailStatus==='error' && <div className="mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">⚠️ {emailError}</div>}
+
+            {res.status === 'confirmed' && (
+              <button onClick={resendConfirmation} disabled={emailSending}
+                className="mt-3 w-full py-2.5 rounded-xl font-bold text-sm text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 transition-colors disabled:opacity-50">
+                🔁 Resend confirmation email
+              </button>
+            )}
           </div>
 
           {/* Client */}
