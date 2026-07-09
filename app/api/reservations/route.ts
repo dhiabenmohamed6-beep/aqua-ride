@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateId, type Reservation } from '@/lib/reservations'
 import { getStoredReservations, upsertReservation, deleteStoredReservation } from '@/lib/data-store'
+import { sendOwnerNotification } from '@/lib/mail'
 
 export async function GET() {
   const reservations = await getStoredReservations()
@@ -16,6 +17,14 @@ export async function POST(req: NextRequest) {
   }
   
   await upsertReservation(reservation)
+
+  try {
+    await sendOwnerNotification(reservation)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Owner notification email failed:', msg)
+  }
+
   return NextResponse.json(reservation)
 }
 
